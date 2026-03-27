@@ -78,6 +78,25 @@ function HomePage({
               </button>
             </form>
           </div>
+
+          <div className="dashboard-card">
+            <div className="card-header">
+              <h3>Financial Markets</h3>
+              <p>Gain knowledge about the stock market & trading basics.</p>
+            </div>
+            <p className="card-text">
+              Explore tutorials and real-time stock charts for the Indian stock market.
+              Learn about indices, individual stocks, risk management, and trading strategies.
+            </p>
+            <a
+              className="secondary-button"
+              href="https://www.nseindia.com/live_market/dynaContent/live_watch/equities_stock_watch.htm"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View latest India stock charts
+            </a>
+          </div>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}

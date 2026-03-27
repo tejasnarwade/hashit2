@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './App.css';
+import HomePage from './HomePage';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
@@ -16,13 +17,39 @@ const initialForm = {
 
 function App() {
   const [mode, setMode] = useState('login');
+  const [route, setRoute] = useState(
+    window.location.pathname === '/home' ? 'home' : 'auth'
+  );
   const [form, setForm] = useState(initialForm);
   const [session, setSession] = useState(null);
+  const [roomForm, setRoomForm] = useState({
+    createName: '',
+    joinName: '',
+    createYears: 5,
+    joinRoomCode: '',
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const isConfigured = useMemo(() => Boolean(supabase), []);
+
+  const navigate = (nextRoute) => {
+    const nextPath = nextRoute === 'home' ? '/home' : '/';
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    }
+    setRoute(nextRoute);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setRoute(window.location.pathname === '/home' ? 'home' : 'auth');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     if (!supabase) {
@@ -57,9 +84,69 @@ function App() {
     };
   }, []);
 
+  // Ensure users table has a row mapping to the authenticated Supabase user (auth_id -> users.user_id)
+  useEffect(() => {
+    if (!supabase) return undefined;
+    if (!session?.user) return undefined;
+
+    let mounted = true;
+    (async () => {
+      try {
+        const authUser = session.user;
+        const authId = authUser.id;
+        const defaultName = authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'User';
+
+        // Prefer select then insert/update to avoid using on_conflict with client REST requests
+        const { data: found, error: findErr } = await supabase
+          .from('users')
+          .select('user_id, name')
+          .eq('auth_id', authId)
+          .limit(1);
+
+        if (findErr) {
+          console.warn('Could not find users for session auth_id:', findErr);
+        }
+
+        if (found && found.length > 0) {
+          const existing = found[0];
+          if (existing.name !== defaultName) {
+            const { error: updErr } = await supabase
+              .from('users')
+              .update({ name: defaultName })
+              .eq('auth_id', authId);
+            if (updErr) console.warn('Failed to update users.name for session auth_id:', updErr);
+          }
+        } else {
+          const { data: insertedUser, error: insertErr } = await supabase
+            .from('users')
+            .insert({ auth_id: authId, name: defaultName })
+            .select()
+            .single();
+          if (insertErr) console.warn('Could not insert users for session auth_id:', insertErr);
+        }
+        if (!mounted) return;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Error ensuring users mapping for session:', e);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [session]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleRoomChange = (event) => {
+    const { name, value } = event.target;
+    setRoomForm((current) => ({
       ...current,
       [name]: value,
     }));
@@ -104,7 +191,8 @@ function App() {
 
     try {
       if (mode === 'register') {
-        const { error: signUpError } = await supabase.auth.signUp({
+        // Attempt to sign up and capture returned auth user id when available
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -116,6 +204,54 @@ function App() {
 
         if (signUpError) {
           throw signUpError;
+        }
+
+        // If auth user id is available immediately, insert/upsert into users with auth_id.
+        try {
+          const authId = signUpData?.user?.id;
+          if (authId) {
+            // Prefer a select then insert/update flow to avoid using on_conflict in client requests
+            const { data: found, error: findErr } = await supabase
+              .from('users')
+              .select('user_id, name')
+              .eq('auth_id', authId)
+              .limit(1);
+            if (findErr) {
+              console.warn('Failed to find users by auth_id after signup:', findErr);
+            }
+
+            if (found && found.length > 0) {
+              // Optionally update the name if it differs
+              const existing = found[0];
+              if (existing.name !== username) {
+                const { error: updErr } = await supabase
+                  .from('users')
+                  .update({ name: username })
+                  .eq('auth_id', authId);
+                if (updErr) console.warn('Failed to update users.name after signup:', updErr);
+              }
+            } else {
+              const { data: insertedUser, error: insertUserError } = await supabase
+                .from('users')
+                .insert({ auth_id: authId, name: username })
+                .select()
+                .single();
+              if (insertUserError) console.warn('Failed to insert into users table after signup:', insertUserError);
+            }
+          } else {
+            // fallback: insert by name only (best-effort)
+            const { data: insertedUser, error: insertUserError } = await supabase
+              .from('users')
+              .insert({ name: username })
+              .select()
+              .single();
+
+            if (insertUserError) {
+              console.warn('Failed to insert into users table after signup:', insertUserError);
+            }
+          }
+        } catch (e) {
+          console.warn('Error inserting/upserting user record after signup:', e);
         }
 
         setMessage(
@@ -195,12 +331,226 @@ function App() {
     }
   };
 
+  const handleCreateRoom = (event) => {
+    event.preventDefault();
+    resetFeedback();
+
+    const createName = roomForm.createName.trim();
+    const totalYears = Number(roomForm.createYears) || 5;
+
+    if (!createName) {
+      setError('Please enter your name to create a room.');
+      return;
+    }
+
+    if (!supabase) {
+      setError('Supabase is not configured. Add your env keys first.');
+      return;
+    }
+
+    // create room flow: insert user, create room, insert room_player
+    (async () => {
+      setLoading(true);
+      try {
+        // Insert user
+        const { data: insertedUsers, error: userError } = await supabase
+          .from('users')
+          .insert({ name: createName })
+          .select();
+
+        if (userError) throw userError;
+        const user = Array.isArray(insertedUsers) ? insertedUsers[0] : insertedUsers;
+        const userId = user?.user_id ?? user?.id;
+
+        // Generate unique room code
+        const generateRoomCode = () => Math.floor(1000 + Math.random() * 9000).toString();
+        let code = generateRoomCode();
+        let attempts = 0;
+        while (attempts < 5) {
+          const { data: existing, error: checkError } = await supabase
+            .from('rooms')
+            .select('room_id')
+            .eq('room_code', code)
+            .limit(1);
+          if (checkError) throw checkError;
+          if (!existing || existing.length === 0) break;
+          code = generateRoomCode();
+          attempts += 1;
+        }
+
+        // Insert room
+        const { data: insertedRooms, error: roomError } = await supabase
+          .from('rooms')
+          .insert({ room_code: code, total_years: totalYears })
+          .select();
+
+        if (roomError) throw roomError;
+        const room = Array.isArray(insertedRooms) ? insertedRooms[0] : insertedRooms;
+        const roomId = room?.room_id ?? room?.id;
+
+        // Insert room_player
+        const { error: rpError } = await supabase
+          .from('room_players')
+          .insert({ room_id: roomId, user_id: userId });
+
+        if (rpError) throw rpError;
+
+        setMessage(`Room created — code: ${code}`);
+        setRoomForm((current) => ({ ...current, createName: '', createYears: 5 }));
+      } catch (err) {
+        setError(err?.message || JSON.stringify(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  const handleJoinRoom = async (event) => {
+    event.preventDefault();
+    resetFeedback();
+
+    const joinName = roomForm.joinName.trim();
+    const joinCode = roomForm.joinRoomCode.trim();
+
+    if (!joinName) {
+      setError('Please enter your name to join a room.');
+      return;
+    }
+
+    if (!joinCode) {
+      setError('Please enter a room code to join.');
+      return;
+    }
+
+    if (!supabase) {
+      setError('Supabase is not configured. Add your env keys first.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Find room by code
+      const { data: rooms, error: roomFindError } = await supabase
+        .from('rooms')
+        .select('room_id')
+        .eq('room_code', joinCode)
+        .limit(1);
+
+      if (roomFindError) throw roomFindError;
+      if (!rooms || rooms.length === 0) {
+        setError('Room not found for code: ' + joinCode);
+        return;
+      }
+
+      const roomId = rooms[0].room_id ?? rooms[0].id;
+
+      // Find or create user in users table. Prefer mapping via auth_id when session exists.
+      let userId = null;
+      const authId = session?.user?.id;
+
+      if (authId) {
+        const { data: authUsers, error: authFindErr } = await supabase
+          .from('users')
+          .select('user_id')
+          .eq('auth_id', authId)
+          .limit(1);
+        if (authFindErr) throw authFindErr;
+        if (authUsers && authUsers.length > 0) {
+          userId = authUsers[0].user_id ?? authUsers[0].id;
+        } else {
+          const { data: insertedUsers, error: insertUserError } = await supabase
+            .from('users')
+            .insert({ auth_id: authId, name: joinName })
+            .select()
+            .single();
+
+          if (insertUserError) throw insertUserError;
+          userId = insertedUsers.user_id ?? insertedUsers.id;
+        }
+      } else {
+        const { data: existingUsers, error: findUserError } = await supabase
+          .from('users')
+          .select('user_id')
+          .ilike('name', joinName)
+          .limit(1);
+
+        if (findUserError) throw findUserError;
+
+        if (existingUsers && existingUsers.length > 0) {
+          userId = existingUsers[0].user_id ?? existingUsers[0].id;
+        } else {
+          const { data: insertedUsers, error: insertUserError } = await supabase
+            .from('users')
+            .insert({ name: joinName })
+            .select()
+            .single();
+
+          if (insertUserError) throw insertUserError;
+          userId = insertedUsers.user_id ?? insertedUsers.id;
+        }
+      }
+
+      // Check if user already in room_players for this room
+      const { data: existingRP, error: rpCheckError } = await supabase
+        .from('room_players')
+        .select('id')
+        .eq('room_id', roomId)
+        .eq('user_id', userId)
+        .limit(1);
+
+      if (rpCheckError) throw rpCheckError;
+
+      if (existingRP && existingRP.length > 0) {
+        setMessage(`${joinName} is already in the room.`);
+        setRoomForm((current) => ({ ...current, joinName: '', joinRoomCode: '' }));
+        return;
+      }
+
+      // Insert into room_players
+      const { error: rpError } = await supabase.from('room_players').insert({ room_id: roomId, user_id: userId });
+      if (rpError) throw rpError;
+
+      setMessage(`${joinName} joined the room.`);
+      setRoomForm((current) => ({ ...current, joinName: '', joinRoomCode: '' }));
+    } catch (err) {
+      setError(err?.message || JSON.stringify(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const currentUser = session?.user;
   const username =
     currentUser?.user_metadata?.username ||
     currentUser?.user_metadata?.full_name ||
     currentUser?.email?.split('@')[0] ||
     'User';
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate('home');
+    } else {
+      navigate('auth');
+    }
+  }, [currentUser]);
+
+  if (currentUser && route === 'home') {
+    return (
+      <HomePage
+        currentUser={currentUser}
+        username={username}
+        roomForm={roomForm}
+        error={error}
+        message={message}
+        loading={loading}
+        onRoomChange={handleRoomChange}
+        onCreateRoom={handleCreateRoom}
+        onJoinRoom={handleJoinRoom}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
 
   return (
     <main className="app-shell">
@@ -226,24 +576,6 @@ function App() {
               Add `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY` to
               your `.env` file, then restart the frontend.
             </p>
-          </div>
-        ) : currentUser ? (
-          <div className="auth-card">
-            <p className="status-badge">Authenticated</p>
-            <h2>Welcome, {username}</h2>
-            <p className="panel-copy">
-              You are signed in as <strong>{currentUser.email}</strong>.
-            </p>
-            {error ? <p className="feedback error">{error}</p> : null}
-            {message ? <p className="feedback success">{message}</p> : null}
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handleSignOut}
-              disabled={loading}
-            >
-              {loading ? 'Signing out...' : 'Sign out'}
-            </button>
           </div>
         ) : (
           <div className="auth-card">
@@ -347,6 +679,8 @@ function App() {
           </div>
         )}
       </section>
+
+      
     </main>
   );
 }

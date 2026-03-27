@@ -2,6 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './App.css';
 import HomePage from './HomePage';
+import CreateRoomForm from './components/CreateRoomForm';
+import JoinRoomForm from './components/JoinRoomForm';
+import GameScreen from './components/GameScreen';
+import LeaderboardScreen from './components/LeaderboardScreen';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
@@ -116,19 +120,23 @@ function App() {
     if (path === '/home') return 'home';
     if (path === '/dashboard') return 'dashboard';
     if (path === '/about') return 'about';
+    if (path === '/game') return 'game';
+    if (path === '/leaderboard') return 'leaderboard';
     return 'auth';
   });
   const [form, setForm] = useState(initialForm);
   const [session, setSession] = useState(null);
-  const [roomForm, setRoomForm] = useState({
-    createName: '',
-    createYears: '',
-    joinName: '',
-    joinRoomCode: '',
-  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  // Game state
+  const [gameState, setGameState] = useState({
+    roomCode: '',
+    roomId: null,
+    userId: null,
+    screen: 'menu', // menu, create, join, game, leaderboard
+  });
 
   const isConfigured = useMemo(() => Boolean(supabase), []);
 
@@ -137,6 +145,8 @@ function App() {
     if (nextRoute === 'home') nextPath = '/home';
     if (nextRoute === 'dashboard') nextPath = '/dashboard';
     if (nextRoute === 'about') nextPath = '/about';
+    if (nextRoute === 'game') nextPath = '/game';
+    if (nextRoute === 'leaderboard') nextPath = '/leaderboard';
 
     if (window.location.pathname !== nextPath) {
       window.history.pushState({}, '', nextPath);
@@ -194,11 +204,51 @@ function App() {
     }));
   };
 
-  const handleRoomChange = (event) => {
-    const { name, value } = event.target;
-    setRoomForm((current) => ({
+  const handleStartCreateRoom = () => {
+    setGameState((current) => ({
       ...current,
-      [name]: value,
+      screen: 'create',
+    }));
+  };
+
+  const handleStartJoinRoom = () => {
+    setGameState((current) => ({
+      ...current,
+      screen: 'join',
+    }));
+  };
+
+  const handleRoomCreated = (roomData) => {
+    setGameState((current) => ({
+      ...current,
+      roomCode: roomData.room_code,
+      roomId: roomData.room_id,
+      userId: roomData.user_id,
+      screen: 'game',
+    }));
+  };
+
+  const handleRoomJoined = (roomData) => {
+    setGameState((current) => ({
+      ...current,
+      roomCode: roomData.room_code,
+      roomId: roomData.room_id,
+      userId: roomData.user_id,
+      screen: 'game',
+    }));
+  };
+
+  const handleBackToMenu = () => {
+    setGameState((current) => ({
+      ...current,
+      screen: 'menu',
+    }));
+  };
+
+  const handleViewLeaderboard = () => {
+    setGameState((current) => ({
+      ...current,
+      screen: 'leaderboard',
     }));
   };
 
@@ -337,35 +387,13 @@ function App() {
   const handleCreateRoom = (event) => {
     event.preventDefault();
     resetFeedback();
-    const createName = roomForm.createName.trim();
-
-    if (!createName) {
-      setError('Please enter your name to create a room.');
-      return;
-    }
-
-    setMessage(`Room created by ${createName}.`);
-    setRoomForm((current) => ({
-      ...current,
-      createName: '',
-    }));
+    // This is handled by CreateRoomForm component now
   };
 
   const handleJoinRoom = (event) => {
     event.preventDefault();
     resetFeedback();
-    const joinName = roomForm.joinName.trim();
-
-    if (!joinName) {
-      setError('Please enter your name to join a room.');
-      return;
-    }
-
-    setMessage(`${joinName} joined the room.`);
-    setRoomForm((current) => ({
-      ...current,
-      joinName: '',
-    }));
+    // This is handled by JoinRoomForm component now
   };
 
   const currentUser = session?.user;
@@ -412,17 +440,77 @@ function App() {
   }
 
   if (currentUser && route === 'home') {
+    // Game routing
+    if (gameState.screen === 'menu') {
+      return (
+        <div className="game-menu-container">
+          <header className="game-menu-header">
+            <h1>HashIt - Finance Simulation Game</h1>
+            <button onClick={() => navigate('dashboard')} className="back-button">
+              ← Back to Dashboard
+            </button>
+          </header>
+
+          <div className="game-menu">
+            <h2>Welcome, {username}!</h2>
+            <p>Choose an option to get started:</p>
+
+            <button onClick={handleStartCreateRoom} className="menu-button">
+              Create New Room
+            </button>
+            <button onClick={handleStartJoinRoom} className="menu-button">
+              Join Existing Room
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (gameState.screen === 'create') {
+      return (
+        <CreateRoomForm
+          onRoomCreated={handleRoomCreated}
+          onCancel={handleBackToMenu}
+        />
+      );
+    }
+
+    if (gameState.screen === 'join') {
+      return (
+        <JoinRoomForm
+          onRoomJoined={handleRoomJoined}
+          onCancel={handleBackToMenu}
+        />
+      );
+    }
+
+    if (gameState.screen === 'game') {
+      return (
+        <GameScreen
+          roomCode={gameState.roomCode}
+          roomId={gameState.roomId}
+          userId={gameState.userId}
+          onBackToMenu={handleViewLeaderboard}
+        />
+      );
+    }
+
+    if (gameState.screen === 'leaderboard') {
+      return (
+        <LeaderboardScreen
+          roomId={gameState.roomId}
+          onBackToMenu={handleBackToMenu}
+        />
+      );
+    }
+
     return (
       <HomePage
         currentUser={currentUser}
         username={username}
-        roomForm={roomForm}
         error={error}
         message={message}
         loading={loading}
-        onRoomChange={handleRoomChange}
-        onCreateRoom={handleCreateRoom}
-        onJoinRoom={handleJoinRoom}
         onSignOut={handleSignOut}
         onHome={() => navigate('dashboard')}
         onAbout={() => navigate('about')}

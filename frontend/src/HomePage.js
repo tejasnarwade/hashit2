@@ -12,7 +12,7 @@ function HomePage({
   onJoinRoom,
   onSignOut,
 }) {
-  return (
+  return (  
     <div className="home-container">
       <nav className="navbar">
         <div className="navbar-brand">

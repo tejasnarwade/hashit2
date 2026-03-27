@@ -11,15 +11,33 @@ function HomePage({
   onCreateRoom,
   onJoinRoom,
   onSignOut,
+  onHome,
+  onAbout,
 }) {
   return (
-    <main className="home-shell">
-      <section className="home-panel">
-        <p className="status-badge">Home</p>
-        <h1>Welcome, {username}</h1>
-        <p className="panel-copy">
-          You are signed in as <strong>{currentUser.email}</strong>.
-        </p>
+    <div className="home-container">
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <h2>HashIt</h2>
+        </div>
+        <div className="navbar-menu">
+          <button className="nav-button" onClick={onHome}>
+            Home
+          </button>
+          <button className="nav-button" onClick={onAbout}>
+            About
+          </button>
+          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
+            {loading ? 'Signing out...' : 'Sign Out'}
+          </button>
+        </div>
+      </nav>
+      
+      <main className="home-main">
+        <div className="welcome-section">
+          <h1>Welcome back, {username}!</h1>
+          <p className="welcome-subtitle">Ready to connect? Create or join a room to start chatting.</p>
+        </div>
 
         <div className="room-grid">
           <form className="room-card" onSubmit={onCreateRoom}>
@@ -34,20 +52,6 @@ function HomePage({
                 onChange={onRoomChange}
               />
             </label>
-
-            <label className="input-group">
-              <span>Number of Years</span>
-              <select
-                name="createYears"
-                value={roomForm.createYears}
-                onChange={onRoomChange}
-              >
-                <option value={5}>5</option>
-                <option value={6}>6</option>
-                <option value={8}>8</option>
-              </select>
-            </label>
-
             <button type="submit" className="primary-button">
               Create Room
             </button>
@@ -55,16 +59,6 @@ function HomePage({
 
           <form className="room-card" onSubmit={onJoinRoom}>
             <h3>Join Room</h3>
-            <label className="input-group">
-              <span>Room Code</span>
-              <input
-                type="text"
-                name="joinRoomCode"
-                placeholder="Enter room code"
-                value={roomForm.joinRoomCode}
-                onChange={onRoomChange}
-              />
-            </label>
             <label className="input-group">
               <span>Your name</span>
               <input
@@ -81,19 +75,10 @@ function HomePage({
           </form>
         </div>
 
-        {error ? <p className="feedback error">{error}</p> : null}
-        {message ? <p className="feedback success">{message}</p> : null}
-
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={onSignOut}
-          disabled={loading}
-        >
-          {loading ? 'Signing out...' : 'Sign out'}
-        </button>
-      </section>
-    </main>
+        {error && <div className="alert alert-error">{error}</div>}
+        {message && <div className="alert alert-success">{message}</div>}
+      </main>
+    </div>
   );
 }
 

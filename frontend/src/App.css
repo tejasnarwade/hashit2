@@ -20,20 +20,215 @@
     linear-gradient(135deg, #f5efe6 0%, #e8f0ff 48%, #f7fbff 100%);
 }
 
-.home-panel {
-  width: min(100%, 640px);
-  padding: 32px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(14px);
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top left, rgba(255, 210, 140, 0.45), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(73, 161, 255, 0.28), transparent 28%),
+    linear-gradient(135deg, #f5efe6 0%, #e8f0ff 48%, #f7fbff 100%);
 }
 
-.home-panel h1 {
-  margin: 14px 0 10px;
-  font-size: 2rem;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #ea580c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #475569;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+.nav-button.active {
+  background: #2563eb;
+  color: white;
+}
+
+.nav-button.signout {
+  background: #dc2626;
+  color: white;
+}
+
+.nav-button.signout:hover {
+  background: #b91c1c;
+}
+
+.home-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.welcome-section h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
   color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  margin-bottom: 1.5rem;
+}
+
+.card-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.card-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.room-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.input-group input {
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.primary-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #2563eb 0%, #ea580c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
 .hero-panel,
@@ -80,8 +275,7 @@
   gap: 12px;
 }
 
-.feature-list span,
-.status-badge {
+.feature-list span {
   padding: 10px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
@@ -214,38 +408,6 @@
   cursor: wait;
 }
 
-.secondary-button {
-  width: 100%;
-  margin-top: 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 16px;
-  padding: 15px 18px;
-  background: #ffffff;
-  color: #0f172a;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.room-grid {
-  display: grid;
-  gap: 14px;
-}
-
-.room-card {
-  padding: 14px;
-  border: 1px solid #dbe3ef;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  display: grid;
-  gap: 12px;
-}
-
-.room-card h3 {
-  margin: 0;
-  color: #0f172a;
-}
-
 .divider {
   position: relative;
   margin: 22px 0;
@@ -289,21 +451,55 @@
   color: #166534;
 }
 
-@media (max-width: 900px) {
-  .app-shell {
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar-menu {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-main {
+    padding: 1rem;
+  }
+
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
+
+  .dashboard-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
-  .hero-panel,
-  .auth-panel {
-    padding: 28px 20px;
+  .dashboard-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand h2 {
+    font-size: 1.25rem;
   }
 
-  .hero-panel h1 {
-    max-width: 100%;
+  .nav-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
   }
 
-  .auth-card {
-    padding: 24px;
+  .welcome-section h1 {
+    font-size: 1.75rem;
+  }
+
+  .dashboard-card {
+    padding: 1rem;
+  }
+
+  .card-header h3 {
+    font-size: 1.25rem;
   }
 }

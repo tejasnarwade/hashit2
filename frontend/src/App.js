@@ -111,41 +111,145 @@ function AboutPage({ username, onBack, onSignOut, loading }) {
         </div>
       </nav>
 
-      <main className="home-main">
-        <div className="welcome-section">
-          <h1>About Vectra</h1>
-          <p className="welcome-subtitle">Financial Life Simulation Game</p>
-        </div>
+      <main className="about-main">
+        {/* Hero Section */}
+        <section className="about-hero">
+          <div className="about-content">
+            <div className="about-badge">Financial Education Platform</div>
+            <h1 className="about-title">
+              Vectra
+              <span className="title-accent">Financial Simulation</span>
+            </h1>
+            <p className="about-subtitle">
+              Master real-world financial decisions through competitive multiplayer gameplay.
+              Build wealth, manage risk, and compete with strategic investment choices.
+            </p>
+          </div>
+        </section>
 
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Game Overview</h3>
+        {/* Key Features */}
+        <section className="features-section">
+          <h2 className="section-title">Core Experience</h2>
+          <div className="features-grid">
+            <div className="feature-item">
+              <div className="feature-number">01</div>
+              <div className="feature-content">
+                <h3>Strategic Investment</h3>
+                <p>Allocate your portfolio across multiple asset classes with realistic risk-return profiles. Make decisions that impact your long-term wealth accumulation.</p>
+              </div>
             </div>
-            <p>Vectra simulates real-world financial decision-making through competitive multiplayer gameplay. Make strategic investments, manage risks, and build wealth over multiple years.</p>
-          </div>
-
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>How to Play</h3>
+            
+            <div className="feature-item">
+              <div className="feature-number">02</div>
+              <div className="feature-content">
+                <h3>Risk Management</h3>
+                <p>Navigate market volatility and unexpected life events. Use insurance products and diversification strategies to protect your financial progress.</p>
+              </div>
             </div>
-            <p>Each round represents one year. Allocate your income between different investments, handle random events, and compete with other players to maximize your net worth.</p>
-          </div>
-
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Investment Options</h3>
+            
+            <div className="feature-item">
+              <div className="feature-number">03</div>
+              <div className="feature-content">
+                <h3>Multiplayer Competition</h3>
+                <p>Compete with real players in timed decision rounds. Compare strategies and learn from different approaches to wealth building.</p>
+              </div>
             </div>
-            <p>Choose from Savings (4% fixed), Mutual Funds (8-12%), Stocks (±20%), Gold, Real Estate, and Crypto (±40%). Each option unlocks as you progress through years.</p>
           </div>
-        </div>
+        </section>
 
-        <div className="dashboard-card" style={{marginTop: '32px'}}>
-          <div className="card-header">
-            <h3>Team Vectra</h3>
+        {/* Game Mechanics */}
+        <section className="mechanics-section">
+          <div className="mechanics-grid">
+            <div className="mechanics-content">
+              <h2 className="section-title">Game Mechanics</h2>
+              <div className="mechanics-list">
+                <div className="mechanic-item">
+                  <strong>Year-Based Rounds</strong>
+                  <span>Each turn represents one financial year with income, expenses, and investment decisions.</span>
+                </div>
+                <div className="mechanic-item">
+                  <strong>Progressive Unlocks</strong>
+                  <span>New investment options become available as you advance through years, mimicking real-life financial maturity.</span>
+                </div>
+                <div className="mechanic-item">
+                  <strong>Dynamic Events</strong>
+                  <span>Random market conditions and life events test your financial resilience and planning skills.</span>
+                </div>
+                <div className="mechanic-item">
+                  <strong>Performance Tracking</strong>
+                  <span>Detailed analytics show your wealth growth, risk exposure, and decision impact over time.</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="investment-showcase">
+              <h3>Investment Portfolio</h3>
+              <div className="investment-options">
+                <div className="investment-tier tier-safe">
+                  <div className="tier-label">Conservative</div>
+                  <div className="investment-option">
+                    <span className="option-name">Savings Account</span>
+                    <span className="option-return">4.0% Fixed</span>
+                  </div>
+                  <div className="investment-option">
+                    <span className="option-name">Government Bonds</span>
+                    <span className="option-return">3.5-5.0%</span>
+                  </div>
+                </div>
+                
+                <div className="investment-tier tier-moderate">
+                  <div className="tier-label">Moderate</div>
+                  <div className="investment-option">
+                    <span className="option-name">Mutual Funds</span>
+                    <span className="option-return">8-12%</span>
+                  </div>
+                  <div className="investment-option">
+                    <span className="option-name">Index Funds</span>
+                    <span className="option-return">7-11%</span>
+                  </div>
+                </div>
+                
+                <div className="investment-tier tier-aggressive">
+                  <div className="tier-label">Aggressive</div>
+                  <div className="investment-option">
+                    <span className="option-name">Individual Stocks</span>
+                    <span className="option-return">±20%</span>
+                  </div>
+                  <div className="investment-option">
+                    <span className="option-name">Cryptocurrency</span>
+                    <span className="option-return">±40%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <p>Built for hackathon competition, combining financial education with engaging gameplay. Experience realistic market scenarios, risk management, and strategic planning in a safe, simulated environment.</p>
-        </div>
+        </section>
+
+        {/* Team Section */}
+        <section className="team-section">
+          <div className="team-card">
+            <h2>Built by Team Vectra</h2>
+            <p>
+              Developed for hackathon competition, Vectra combines rigorous financial education 
+              principles with engaging game mechanics. Our goal is to make financial literacy 
+              accessible and practical through hands-on experience.
+            </p>
+            <div className="team-stats">
+              <div className="stat">
+                <span className="stat-number">6</span>
+                <span className="stat-label">Asset Classes</span>
+              </div>
+              <div className="stat">
+                <span className="stat-number">10+</span>
+                <span className="stat-label">Event Types</span>
+              </div>
+              <div className="stat">
+                <span className="stat-number">∞</span>
+                <span className="stat-label">Learning Potential</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

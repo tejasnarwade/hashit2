@@ -203,15 +203,6 @@ function DashboardPage({ username, onNavigate, onSignOut, loading }) {
   );
 }
 
-const CHART_WIDGETS = [
-  { label: 'Nifty 50', symbol: 'NSE:NIFTY', color: '#00ff9d' },
-  { label: 'Sensex', symbol: 'BSE:SENSEX', color: '#00d0ff' },
-  { label: 'Bank Nifty', symbol: 'NSE:BANKNIFTY', color: '#a78bfa' },
-  { label: 'Nifty IT', symbol: 'NSE:NIFTYIT', color: '#fbbf24' },
-  { label: 'Nifty Pharma', symbol: 'NSE:CNXPHARMA', color: '#f472b6' },
-  { label: 'Nifty Midcap', symbol: 'NSE:NIFTY_MIDCAP_100', color: '#fb923c' },
-];
-
 const MARKET_TOPICS = [
   {
     title: 'The Stock Market — An Introduction',
@@ -319,116 +310,150 @@ const MARKET_TOPICS = [
   },
 ];
 
-const CHART_LINKS = [
-  { label: 'Nifty 50 Live Chart', url: 'https://www.tradingview.com/chart/?symbol=NSE%3ANIFTY' },
-  { label: 'Sensex Live Chart', url: 'https://www.tradingview.com/chart/?symbol=BSE%3ASENSEX' },
-  { label: 'Nifty Bank Live Chart', url: 'https://www.tradingview.com/chart/?symbol=NSE%3ABANKNIFTY' },
-  { label: 'Nifty IT Live Chart', url: 'https://www.tradingview.com/chart/?symbol=NSE%3ANIFTYIT' },
-  { label: 'NSE Market Overview', url: 'https://www.nseindia.com/market-data/live-equity-market' },
-  { label: 'BSE Market Overview', url: 'https://www.bseindia.com/markets/equity/EQReports/MarketWatch.aspx' },
+const CHART_WIDGETS = [
+  { label: 'Nifty 50', symbol: 'NSE:NIFTY', color: '#00ff9d', emoji: '📈', desc: 'Top 50 NSE stocks' },
+  { label: 'Sensex', symbol: 'BSE:SENSEX', color: '#00d0ff', emoji: '🏦', desc: 'Top 30 BSE stocks' },
+  { label: 'Bank Nifty', symbol: 'NSE:BANKNIFTY', color: '#a78bfa', emoji: '🏧', desc: 'Banking sector index' },
+  { label: 'Nifty IT', symbol: 'NSE:NIFTYIT', color: '#fbbf24', emoji: '💻', desc: 'IT sector index' },
+  { label: 'Nifty Pharma', symbol: 'NSE:CNXPHARMA', color: '#f472b6', emoji: '💊', desc: 'Pharma sector index' },
+  { label: 'Nifty Midcap', symbol: 'NSE:NIFTY_MIDCAP_100', color: '#fb923c', emoji: '📊', desc: 'Midcap 100 index' },
 ];
+
+function TradingViewChart({ symbol, label, onClose }) {
+  const containerId = React.useId().replace(/:/g, '');
+  React.useEffect(() => {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = `<div class="tradingview-widget-container__widget"></div>`;
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      symbol,
+      interval: 'D',
+      timezone: 'Asia/Kolkata',
+      theme: 'dark',
+      style: '1',
+      locale: 'en',
+      allow_symbol_change: true,
+      calendar: false,
+      autosize: true,
+    });
+    el.appendChild(script);
+    return () => { el.innerHTML = ''; };
+  }, [symbol, containerId]);
+
+  return (
+    <div className="chart-modal-overlay" onClick={onClose}>
+      <div className="chart-modal" onClick={e => e.stopPropagation()}>
+        <button className="chart-modal-close" onClick={onClose}>✕</button>
+        <div
+          id={containerId}
+          className="tradingview-widget-container"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
+    </div>
+  );
+}
 
 function MarketsPage({ onBack, onSignOut, loading }) {
   const [activeTab, setActiveTab] = React.useState('learn');
+  const [activeChart, setActiveChart] = React.useState(null);
+  const [unlockedModules, setUnlockedModules] = React.useState([0]);
+  const [xp, setXp] = React.useState(0);
+
+  const unlockNext = (i) => {
+    if (!unlockedModules.includes(i)) return;
+    const next = i + 1;
+    if (next < MARKET_TOPICS.length && !unlockedModules.includes(next)) {
+      setUnlockedModules(prev => [...prev, next]);
+      setXp(prev => prev + 50);
+    }
+  };
+
   return (
     <div className="home-container">
+      {activeChart && <TradingViewChart symbol={activeChart.symbol} label={activeChart.label} onClose={() => setActiveChart(null)} />}
       <nav className="navbar">
         <div className="navbar-brand"><h2>Vectra</h2></div>
         <div className="navbar-menu">
           <button className="nav-button" onClick={onBack}>Dashboard</button>
           <button className="nav-button active">Markets</button>
+          <div className="xp-badge">⚡ {xp} XP</div>
           <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
             {loading ? 'Signing out...' : 'Sign Out'}
           </button>
         </div>
       </nav>
+
       <main className="about-main">
-        <section className="about-hero">
+        <section className="about-hero" style={{ paddingBottom: 40 }}>
           <div className="about-content">
-            <div className="about-badge">Indian Stock Market</div>
-            <h1 className="about-title">Financial Markets<span className="title-accent"> Knowledge Hub</span></h1>
-            <p className="about-subtitle">Learn how stock markets work and track live Indian market charts.</p>
+            <div className="about-badge">🎮 Market Training Arena</div>
+            <h1 className="about-title">Level Up Your<span className="title-accent"> Market Knowledge</span></h1>
+            <p className="about-subtitle">Complete modules to unlock the next. Earn XP. Master the markets.</p>
+            <div className="xp-bar-wrap">
+              <div className="xp-bar-track">
+                <div className="xp-bar-fill" style={{ width: `${Math.min((xp / 400) * 100, 100)}%` }} />
+              </div>
+              <span className="xp-bar-label">{xp} / 400 XP — {unlockedModules.length} / {MARKET_TOPICS.length} modules unlocked</span>
+            </div>
           </div>
         </section>
 
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
-          <button
-            className={`card-action-button${activeTab === 'learn' ? ' primary' : ''}`}
-            onClick={() => setActiveTab('learn')}
-          >📚 Learn</button>
-          <button
-            className={`card-action-button${activeTab === 'charts' ? ' primary' : ''}`}
-            onClick={() => setActiveTab('charts')}
-          >📈 Live Charts</button>
+        <div className="markets-tab-row">
+          <button className={`markets-tab${activeTab === 'learn' ? ' active' : ''}`} onClick={() => setActiveTab('learn')}>📚 Learn Modules</button>
+          <button className={`markets-tab${activeTab === 'charts' ? ' active' : ''}`} onClick={() => setActiveTab('charts')}>📈 Live Charts</button>
         </div>
 
         {activeTab === 'learn' && (
-          <section className="features-section">
-            <div style={{ display: 'grid', gap: '2rem', maxWidth: 900, margin: '0 auto' }}>
-              {MARKET_TOPICS.map((topic, i) => (
-                <div key={i} style={{
-                  background: 'rgba(15,20,32,0.85)',
-                  border: '1px solid rgba(0,255,157,0.15)',
-                  borderRadius: 16,
-                  overflow: 'hidden',
-                  backdropFilter: 'blur(20px)',
-                }}>
-                  <img
-                    src={topic.img}
-                    alt={topic.title}
-                    onError={e => { e.target.style.display = 'none'; }}
-                    style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }}
-                  />
-                  <div style={{ padding: '24px 28px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                      <span style={{
-                        padding: '3px 10px', borderRadius: 20,
-                        background: 'rgba(0,255,157,0.1)', border: '1px solid rgba(0,255,157,0.3)',
-                        color: '#00ff9d', fontSize: '0.75rem', fontWeight: 600,
-                      }}>{topic.tag}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem' }}>Zerodha Varsity</span>
-                    </div>
-                    <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px' }}>{topic.title}</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, margin: '0 0 16px', fontSize: '0.95rem' }}>{topic.body}</p>
-                    <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="modules-grid">
+            {MARKET_TOPICS.map((topic, i) => {
+              const locked = !unlockedModules.includes(i);
+              return (
+                <div key={i} className={`module-card${locked ? ' locked' : ''}`}>
+                  <div className="module-img-wrap">
+                    <img src={topic.img} alt={topic.title} onError={e => { e.target.style.display = 'none'; }} />
+                    {locked && <div className="module-lock-overlay">🔒<span>Complete previous module</span></div>}
+                    <div className="module-tag">{topic.tag}</div>
+                    <div className="module-xp-badge">+50 XP</div>
+                  </div>
+                  <div className="module-body">
+                    <h3>{topic.title}</h3>
+                    <p>{topic.body}</p>
+                    <ul className="module-points">
                       {topic.points.map((pt, j) => (
-                        <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem' }}>
-                          <span style={{ color: '#00ff9d', marginTop: 2, flexShrink: 0 }}>&#10003;</span>
-                          {pt}
-                        </li>
+                        <li key={j}><span className="check">✓</span>{pt}</li>
                       ))}
                     </ul>
-                    <a href={topic.source} target="_blank" rel="noopener noreferrer" style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 18,
-                      color: '#00d0ff', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none',
-                    }}>Read on Varsity →</a>
+                    {!locked && (
+                      <button className="module-complete-btn" onClick={() => unlockNext(i)}>
+                        {unlockedModules.includes(i + 1) || i === MARKET_TOPICS.length - 1 ? '✅ Completed' : '▶ Mark Complete & Unlock Next'}
+                      </button>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
+              );
+            })}
+          </div>
         )}
 
         {activeTab === 'charts' && (
-          <section className="features-section">
-            <h2 className="section-title">Live Indian Market Charts</h2>
-            <p style={{ color: 'var(--text-muted, #aaa)', textAlign: 'center', marginBottom: '1.5rem' }}>
-              Click any chart to open it live in a new tab via TradingView / NSE / BSE.
-            </p>
-            <div className="actions-grid">
-              {CHART_LINKS.map((link, i) => (
-                <div className="action-card" key={i}>
-                  <div className="card-content">
-                    <h3>{link.label}</h3>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted, #aaa)' }}>{link.url.replace('https://', '')}</p>
-                  </div>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="card-action-button primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    View Chart <span className="button-arrow">→</span>
-                  </a>
-                </div>
+          <div className="charts-arena">
+            <p className="charts-subtitle">🎯 Click any index to open its live chart right here</p>
+            <div className="charts-grid">
+              {CHART_WIDGETS.map((c, i) => (
+                <button key={i} className="chart-card" style={{ '--chart-color': c.color }} onClick={() => setActiveChart(c)}>
+                  <div className="chart-card-emoji">{c.emoji}</div>
+                  <div className="chart-card-label">{c.label}</div>
+                  <div className="chart-card-desc">{c.desc}</div>
+                  <div className="chart-card-cta">View Live Chart →</div>
+                </button>
               ))}
             </div>
-          </section>
+          </div>
         )}
       </main>
     </div>
@@ -608,6 +633,8 @@ function App() {
     joinName: '',
   });
 
+
+  
   const isConfigured = useMemo(() => Boolean(supabase), []);
 
   const navigate = (path) => {
@@ -755,16 +782,12 @@ function App() {
       setLoading(false);
     }
   };
-
-  const handleGoogleAuth = async () => {
+const handleGoogleAuth = async () => {
     resetFeedback();
-
     if (!supabase) {
-      setError('Supabase is not configured. Add your env keys first.');
+      setError('Supabase is not configured.');
       return;
     }
-
-    setLoading(true);
 
     try {
       const { error: googleError } = await supabase.auth.signInWithOAuth({
@@ -773,19 +796,11 @@ function App() {
           redirectTo: window.location.origin,
         },
       });
-
-      if (googleError) {
-        throw googleError;
-      }
-    } catch (googleError) {
-      setError(
-        googleError.message ||
-          'Google sign-in could not start. Check your Supabase Google provider settings.'
-      );
-      setLoading(false);
+      if (googleError) throw googleError;
+    } catch (err) {
+      setError(err.message);
     }
   };
-
   const handleRoomChange = (event) => {
     const { name, value } = event.target;
     setRoomForm((current) => ({

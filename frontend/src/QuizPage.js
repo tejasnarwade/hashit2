@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import './QuizPage.css';
 
 function QuizPage({ currentUser, username, loading, onSignOut }) {
   const QUIZ_TIMER_SECONDS = 20;

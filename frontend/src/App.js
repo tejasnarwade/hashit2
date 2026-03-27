@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import HomePage from './HomePage';
+import { createClient } from '@supabase/supabase-js';
+import QuizPage from './QuizPage';
+import Chatbot from './Chatbot';
 import AIChatBot from './AIChatBot';
 import InvestmentSimulator from './InvestmentSimulator';
-import GameScreen from './components/GameScreen';
-import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
@@ -42,25 +43,25 @@ const FloatingSymbols = () => {
 };
 
 // New Dashboard and About pages from upstream
-function Navbar({ active, onNavigate, onSignOut, loading }) {
-  return (
-    <nav className="navbar">
-      <div className="navbar-brand"><h2>Vectra</h2></div>
-      <div className="navbar-menu">
-        <button className={`nav-button${active === 'dashboard' ? ' active' : ''}`} onClick={() => onNavigate('dashboard')}>Dashboard</button>
-        <button className={`nav-button${active === 'home' ? ' active' : ''}`} onClick={() => onNavigate('home')}>Game Room</button>
-        <button className={`nav-button${active === 'markets' ? ' active' : ''}`} onClick={() => onNavigate('markets')}>Markets</button>
-        <button className={`nav-button${active === 'about' ? ' active' : ''}`} onClick={() => onNavigate('about')}>About</button>
-        <button className="nav-button signout" onClick={onSignOut} disabled={loading}>{loading ? 'Signing out...' : 'Sign Out'}</button>
-      </div>
-    </nav>
-  );
-}
-
 function DashboardPage({ username, onNavigate, onSignOut, loading }) {
   return (
     <div className="home-container">
-      <Navbar active="dashboard" onNavigate={onNavigate} onSignOut={onSignOut} loading={loading} />
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <h2>Vectra</h2>
+        </div>
+        <div className="navbar-menu">
+          <button className="nav-button active" onClick={() => onNavigate('dashboard')}>
+            Dashboard
+          </button>
+          <button className="nav-button" onClick={() => onNavigate('about')}>
+            About
+          </button>
+          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
+            {loading ? 'Signing out...' : 'Sign Out'}
+          </button>
+        </div>
+      </nav>
 
       <main className="dashboard-main">
         {/* Enhanced Hero Section */}
@@ -176,19 +177,19 @@ function DashboardPage({ username, onNavigate, onSignOut, loading }) {
             <div className="action-card">
               <div className="card-decoration"></div>
               <div className="card-icon-wrapper">
-                <div className="card-icon"></div>
+                <div className="card-icon learn-icon"></div>
               </div>
               <div className="card-content">
-                <h3>AI ChatBot</h3>
-                <p>Chat with our intelligent AI financial advisor. Get personalized investment advice and learn about market trends in real-time.</p>
+                <h3>AI Financial Coach</h3>
+                <p>Ask money questions naturally. The coach collects only missing details, then gives personalized beginner-friendly guidance.</p>
                 <div className="card-features">
-                  <span className="feature-tag">AI-Powered</span>
-                  <span className="feature-tag">24/7 Available</span>
-                  <span className="feature-tag">Smart Advice</span>
+                  <span className="feature-tag">Personalized</span>
+                  <span className="feature-tag">Adaptive</span>
+                  <span className="feature-tag">Beginner-friendly</span>
                 </div>
               </div>
               <button className="card-action-button" onClick={() => onNavigate('chatbot')}>
-                Start Chatting
+                Open Chatbot
                 <span className="button-arrow">→</span>
               </button>
             </div>
@@ -200,7 +201,7 @@ function DashboardPage({ username, onNavigate, onSignOut, loading }) {
               </div>
               <div className="card-content">
                 <h3>Investment Simulator</h3>
-                <p>Practice investing with virtual money. Choose assets, experience market events, and learn from profit/loss without risking real money.</p>
+                <p>Practice investing with virtual money. Learn from gains and losses without risking real funds.</p>
                 <div className="card-features">
                   <span className="feature-tag">Risk-Free</span>
                   <span className="feature-tag">Interactive</span>
@@ -401,7 +402,7 @@ function TradingViewChart({ symbol, label, onClose }) {
   );
 }
 
-function MarketsPage({ onNavigate, onSignOut, loading }) {
+function MarketsPage({ onBack, onSignOut, loading }) {
   const [activeTab, setActiveTab] = React.useState('learn');
   const [activeChart, setActiveChart] = React.useState(null);
   const [unlockedModules, setUnlockedModules] = React.useState([0]);
@@ -418,8 +419,18 @@ function MarketsPage({ onNavigate, onSignOut, loading }) {
 
   return (
     <div className="home-container">
-      {activeChart && <TradingViewChart ticker={activeChart.ticker} label={activeChart.label} color={activeChart.color} onClose={() => setActiveChart(null)} />}
-      <Navbar active="markets" onNavigate={onNavigate} onSignOut={onSignOut} loading={loading} />
+      {activeChart && <TradingViewChart symbol={activeChart.symbol} label={activeChart.label} onClose={() => setActiveChart(null)} />}
+      <nav className="navbar">
+        <div className="navbar-brand"><h2>Vectra</h2></div>
+        <div className="navbar-menu">
+          <button className="nav-button" onClick={onBack}>Dashboard</button>
+          <button className="nav-button active">Markets</button>
+          <div className="xp-badge">⚡ {xp} XP</div>
+          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
+            {loading ? 'Signing out...' : 'Sign Out'}
+          </button>
+        </div>
+      </nav>
 
       <main className="about-main">
         <section className="about-hero" style={{ paddingBottom: 40 }}>
@@ -493,10 +504,21 @@ function MarketsPage({ onNavigate, onSignOut, loading }) {
   );
 }
 
-function AboutPage({ username, onNavigate, onSignOut, loading }) {
+function AboutPage({ username, onBack, onSignOut, loading }) {
   return (
     <div className="home-container">
-      <Navbar active="about" onNavigate={onNavigate} onSignOut={onSignOut} loading={loading} />
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <h2>Vectra</h2>
+        </div>
+        <div className="navbar-menu">
+          <button className="nav-button" onClick={onBack}>Dashboard</button>
+          <button className="nav-button active">About</button>
+          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
+            {loading ? 'Signing out...' : 'Sign Out'}
+          </button>
+        </div>
+      </nav>
 
       <main className="about-main">
         {/* Hero Section */}
@@ -644,31 +666,72 @@ function AboutPage({ username, onNavigate, onSignOut, loading }) {
 
 function App() {
   const [mode, setMode] = useState('login');
+  const [route, setRoute] = useState(
+    window.location.pathname === '/quiz'
+      ? 'quiz'
+      : window.location.pathname === '/home'
+        ? 'home'
+        : window.location.pathname === '/chatbot'
+          ? 'chatbot'
+          : window.location.pathname === '/ai-chatbot'
+            ? 'ai-chatbot'
+            : window.location.pathname === '/investment-simulator'
+              ? 'investment-simulator'
+        : 'auth'
+  );
   const [form, setForm] = useState(initialForm);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [route, setRoute] = useState('auth'); // Add routing state
   const [roomForm, setRoomForm] = useState({
     createName: '',
-    createPlayerName: '',
     joinName: '',
-    joinPlayerName: '',
   });
-  const [roomCode, setRoomCode] = useState(null);
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [integerUserId, setIntegerUserId] = useState(null);
 
 
   
   const isConfigured = useMemo(() => Boolean(supabase), []);
 
-  const navigate = (path) => {
-    setRoute(path);
-    resetFeedback();
+  const navigate = (nextRoute) => {
+    const nextPath =
+      nextRoute === 'quiz'
+        ? '/quiz'
+        : nextRoute === 'home'
+          ? '/home'
+          : nextRoute === 'chatbot'
+            ? '/chatbot'
+            : nextRoute === 'ai-chatbot'
+              ? '/ai-chatbot'
+              : nextRoute === 'investment-simulator'
+                ? '/investment-simulator'
+            : '/';
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    }
+    setRoute(nextRoute);
   };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname === '/quiz') {
+        setRoute('quiz');
+      } else if (window.location.pathname === '/home') {
+        setRoute('home');
+      } else if (window.location.pathname === '/chatbot') {
+        setRoute('chatbot');
+      } else if (window.location.pathname === '/ai-chatbot') {
+        setRoute('ai-chatbot');
+      } else if (window.location.pathname === '/investment-simulator') {
+        setRoute('investment-simulator');
+      } else {
+        setRoute('auth');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     if (!supabase) {
@@ -837,263 +900,30 @@ const handleGoogleAuth = async () => {
     }));
   };
 
-  const handleCreateRoom = async (event) => {
+  const handleCreateRoom = (event) => {
     event.preventDefault();
     resetFeedback();
-    setLoading(true);
     
-    try {
-      if (!roomForm.createName.trim()) {
-        setError('Please enter a room name');
-        setLoading(false);
-        return;
-      }
-      
-      if (!roomForm.createPlayerName.trim()) {
-        setError('Please enter your player name');
-        setLoading(false);
-        return;
-      }
-      
-      // Generate a random room code as integer (6-digit number: 100000-999999)
-      const generatedRoomCode = Math.floor(100000 + Math.random() * 900000);
-      
-      // Create room in Supabase
-      if (supabase) {
-        // First, create or get user in the users table
-        const { data: existingUsers, error: userCheckError } = await supabase
-          .from('users')
-          .select('user_id')
-          .eq('auth_id', currentUser?.id);
-
-        let userId;
-        
-        if (!existingUsers || existingUsers.length === 0) {
-          // User doesn't exist, create new user record
-          const { data: newUser, error: userCreateError } = await supabase
-            .from('users')
-            .insert({
-              name: roomForm.createPlayerName,
-              auth_id: currentUser?.id,
-            })
-            .select('user_id')
-            .single();
-
-          if (userCreateError) {
-            console.error('User creation error:', userCreateError);
-            setError(`Failed to create user: ${userCreateError.message}`);
-            setLoading(false);
-            return;
-          }
-          userId = newUser.user_id;
-        } else {
-          userId = existingUsers[0].user_id;
-        }
-
-        // Create room
-        const { data: room, error: roomError } = await supabase
-          .from('rooms')
-          .insert({
-            room_code: generatedRoomCode,
-            current_year: 1,
-            total_years: 6,
-            status: 'waiting',
-          })
-          .select()
-          .single();
-
-        if (roomError) {
-          console.error('Room creation error:', roomError);
-          setError(`Failed to create room: ${roomError.message}`);
-          setLoading(false);
-          return;
-        }
-
-        // Get the actual room_id from the response
-        const roomId = room.room_id;
-
-        // Add player to room
-        const { error: playerError } = await supabase
-          .from('room_players')
-          .insert({
-            room_id: roomId,
-            user_id: userId,
-            starting_wealth: 50000,
-            current_wealth: 50000,
-            salary: 300000,
-            current_year: 1,
-          });
-
-        if (playerError) {
-          console.error('Player add error:', playerError);
-          setError(`Failed to add player: ${playerError.message}`);
-          setLoading(false);
-          return;
-        }
-
-        setRoomCode(generatedRoomCode);
-        setSelectedRoomId(roomId);
-        setIntegerUserId(userId);
-        setMessage(`Game room "${roomForm.createName}" created! Code: ${generatedRoomCode}`);
-        setRoomForm({ ...roomForm, createName: '', createPlayerName: '' });
-        
-        // Navigate to game after a short delay
-        setTimeout(() => {
-          setLoading(false);
-          navigate('game');
-        }, 500);
-      } else {
-        // Supabase not configured - use local game
-        setRoomCode(generatedRoomCode);
-        setSelectedRoomId(generatedRoomCode);
-        setMessage(`Game room created locally! Code: ${generatedRoomCode}`);
-        setRoomForm({ ...roomForm, createName: '', createPlayerName: '' });
-        
-        setTimeout(() => {
-          setLoading(false);
-          navigate('game');
-        }, 500);
-      }
-    } catch (err) {
-      console.error('Error creating room:', err);
-      setError(err.message || 'Failed to create room');
-      setLoading(false);
+    if (!roomForm.createName.trim()) {
+      setError('Please enter a room name');
+      return;
     }
+    
+    setMessage(`Game room "${roomForm.createName}" created! (Backend integration pending)`);
+    setRoomForm({ ...roomForm, createName: '' });
   };
 
-  const handleJoinRoom = async (event) => {
+  const handleJoinRoom = (event) => {
     event.preventDefault();
     resetFeedback();
-    setLoading(true);
     
-    try {
-      if (!roomForm.joinName.trim()) {
-        setError('Please enter a room code');
-        setLoading(false);
-        return;
-      }
-      
-      if (!roomForm.joinPlayerName.trim()) {
-        setError('Please enter your player name');
-        setLoading(false);
-        return;
-      }
-
-      const roomCodeToJoin = roomForm.joinName;
-
-      // Verify room exists in Supabase
-      if (supabase) {
-        const { data: room, error: roomError } = await supabase
-          .from('rooms')
-          .select('room_id, total_years')
-          .eq('room_code', roomCodeToJoin)
-          .single();
-
-        if (roomError || !room) {
-          setError(`Room code "${roomCodeToJoin}" not found`);
-          setLoading(false);
-          return;
-        }
-
-        // First, create or get user in the users table
-        const { data: existingUsers, error: userCheckError } = await supabase
-          .from('users')
-          .select('user_id')
-          .eq('auth_id', currentUser?.id);
-
-        let userId;
-        
-        if (!existingUsers || existingUsers.length === 0) {
-          // User doesn't exist, create new user record
-          const { data: newUser, error: userCreateError } = await supabase
-            .from('users')
-            .insert({
-              name: roomForm.joinPlayerName,
-              auth_id: currentUser?.id,
-            })
-            .select('user_id')
-            .single();
-
-          if (userCreateError) {
-            console.error('User creation error:', userCreateError);
-            setError(`Failed to create user: ${userCreateError.message}`);
-            setLoading(false);
-            return;
-          }
-          userId = newUser.user_id;
-        } else {
-          userId = existingUsers[0].user_id;
-        }
-
-        const roomId = room.room_id;
-
-        // Add player to room
-        const { error: playerError } = await supabase
-          .from('room_players')
-          .insert({
-            room_id: roomId,
-            user_id: userId,
-            starting_wealth: 50000,
-            current_wealth: 50000,
-            salary: 300000,
-            current_year: 1,
-          });
-
-        if (playerError) {
-          console.error('Player add error:', playerError);
-          setError(`Failed to join room: ${playerError.message}`);
-          setLoading(false);
-          return;
-        }
-
-        setRoomCode(roomCodeToJoin);
-        setSelectedRoomId(roomId);
-        setIntegerUserId(userId);
-        setMessage(`Successfully joined room "${roomCodeToJoin}"!`);
-      } else {
-        // Supabase not configured - allow local join
-        setRoomCode(roomCodeToJoin);
-        setSelectedRoomId(roomCodeToJoin);
-        setMessage(`Joining room "${roomCodeToJoin}"...`);
-      }
-      
-      setRoomForm({ 
-        ...roomForm, 
-        joinName: '',
-        joinPlayerName: '',
-      });
-      
-      // Navigate to game after a short delay
-      setTimeout(() => {
-        setLoading(false);
-        navigate('game');
-      }, 500);
-    } catch (err) {
-      console.error('Join room error:', err);
-      setError('An error occurred while joining the room');
-      setLoading(false);
+    if (!roomForm.joinName.trim()) {
+      setError('Please enter a room code');
+      return;
     }
-  };
-
-  const fetchLeaderboard = async (roomId) => {
-    try {
-      if (!supabase) return;
-
-      const { data: players, error } = await supabase
-        .from('room_players')
-        .select('player_name, current_wealth, users(email)')
-        .eq('room_id', roomId)
-        .order('current_wealth', { ascending: false });
-
-      if (error) {
-        console.error('Leaderboard fetch error:', error);
-        return;
-      }
-
-      setLeaderboard(players || []);
-    } catch (err) {
-      console.error('Leaderboard error:', err);
-    }
+    
+    setMessage(`Joining room "${roomForm.joinName}"... (Backend integration pending)`);
+    setRoomForm({ ...roomForm, joinName: '' });
   };
 
   const currentUser = session?.user;
@@ -1114,20 +944,14 @@ const handleGoogleAuth = async () => {
         navigate('auth');
       }
     }
-  }, [currentUser]);
+  }, [currentUser, route]);
 
   // Handle different routes for authenticated users
   if (currentUser && route === 'dashboard') {
     return (
       <DashboardPage
         username={username}
-        onNavigate={(path) => {
-          if (path === 'quiz') {
-            setMessage('Quiz feature coming soon!');
-            return;
-          }
-          navigate(path);
-        }}
+        onNavigate={(path) => navigate(path)}
         onSignOut={handleSignOut}
         loading={loading}
       />
@@ -1137,7 +961,7 @@ const handleGoogleAuth = async () => {
   if (currentUser && route === 'markets') {
     return (
       <MarketsPage
-        onNavigate={navigate}
+        onBack={() => navigate('dashboard')}
         onSignOut={handleSignOut}
         loading={loading}
       />
@@ -1148,41 +972,9 @@ const handleGoogleAuth = async () => {
     return (
       <AboutPage
         username={username}
-        onNavigate={navigate}
-        onSignOut={handleSignOut}
-        loading={loading}
-      />
-    );
-  }
-
-  if (currentUser && route === 'chatbot') {
-    return (
-      <AIChatBot
         onBack={() => navigate('dashboard')}
         onSignOut={handleSignOut}
         loading={loading}
-      />
-    );
-  }
-
-  if (currentUser && route === 'investment-simulator') {
-    return (
-      <InvestmentSimulator
-        onBack={() => navigate('dashboard')}
-        onSignOut={handleSignOut}
-        loading={loading}
-      />
-    );
-  }
-
-  if (currentUser && route === 'game') {
-    return (
-      <GameScreen
-        roomCode={roomCode}
-        roomId={selectedRoomId}
-        userId={currentUser?.id}
-        integerUserId={integerUserId}
-        onBackToMenu={() => navigate('home')}
       />
     );
   }
@@ -1200,8 +992,49 @@ const handleGoogleAuth = async () => {
         onCreateRoom={handleCreateRoom}
         onJoinRoom={handleJoinRoom}
         onSignOut={handleSignOut}
-        onNavigate={navigate}
-        onBackToDashboard={() => navigate('dashboard')}
+        onNavigate={(path) => navigate(path)}
+      />
+    );
+  }
+
+  if (currentUser && route === 'quiz') {
+    return (
+      <QuizPage
+        currentUser={currentUser}
+        username={username}
+        loading={loading}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
+
+  if (currentUser && route === 'chatbot') {
+    return (
+      <Chatbot
+        username={username}
+        onBack={() => navigate('dashboard')}
+        onSignOut={handleSignOut}
+        loading={loading}
+      />
+    );
+  }
+
+  if (currentUser && route === 'ai-chatbot') {
+    return (
+      <AIChatBot
+        onBack={() => navigate('dashboard')}
+        onSignOut={handleSignOut}
+        loading={loading}
+      />
+    );
+  }
+
+  if (currentUser && route === 'investment-simulator') {
+    return (
+      <InvestmentSimulator
+        onBack={() => navigate('dashboard')}
+        onSignOut={handleSignOut}
+        loading={loading}
       />
     );
   }
@@ -1232,7 +1065,7 @@ const handleGoogleAuth = async () => {
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
           onSignOut={handleSignOut}
-          onNavigate={navigate}
+          onNavigate={(path) => navigate(path)}
         />
       ) : (
         <main className="app-shell">

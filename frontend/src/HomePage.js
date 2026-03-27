@@ -11,6 +11,7 @@ function HomePage({
   onCreateRoom,
   onJoinRoom,
   onSignOut,
+  onBackToDashboard,
 }) {
   return (  
     <div className="home-container">
@@ -19,7 +20,13 @@ function HomePage({
           <h2>Vectra</h2>
         </div>
         <div className="navbar-menu">
-          <button className="nav-button active">Dashboard</button>
+          <button 
+            className="nav-button" 
+            onClick={onBackToDashboard}
+            title="Return to dashboard"
+          >
+            ← Back to Dashboard
+          </button>
           <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
             {loading ? 'Logging Out...' : 'Exit Game'}
           </button>
@@ -28,60 +35,96 @@ function HomePage({
 
       <main className="home-main">
         <div className="welcome-section">
-          <h1>Welcome, {username}</h1>
+          <h1>Welcome, {username}! 🎮</h1>
           <p className="welcome-subtitle">Ready to compete? Create or join a game room to start your financial journey.</p>
         </div>
+
+        {/* Display feedback messages */}
+        {error && <div className="alert alert-error">{error}</div>}
+        {message && <div className="alert alert-success">{message}</div>}
 
         <div className="dashboard-grid">
           <div className="dashboard-card">
             <div className="card-header">
-              <h3>Create New Game</h3>
+              <h3>✨ Create New Game</h3>
               <p>Start a new financial simulation match</p>
             </div>
             <form className="room-form" onSubmit={onCreateRoom}>
+              <div className="input-group">
+                <label>Player Name</label>
+                <input
+                  type="text"
+                  name="createPlayerName"
+                  placeholder="Enter your name (e.g., 'Alex')"
+                  value={roomForm.createPlayerName || ''}
+                  onChange={onRoomChange}
+                  disabled={loading}
+                  required
+                />
+              </div>
               <div className="input-group">
                 <label>Room Name</label>
                 <input
                   type="text"
                   name="createName"
-                  placeholder="Enter room name"
+                  placeholder="Enter room name (e.g., 'Finance Masters')"
                   value={roomForm.createName}
                   onChange={onRoomChange}
+                  disabled={loading}
                   required
                 />
               </div>
-              <button type="submit" className="primary-button">
-                Create Game Room
+              <button 
+                type="submit" 
+                className="primary-button"
+                disabled={loading}
+              >
+                {loading ? 'Creating Room...' : 'Create Game Room'}
               </button>
             </form>
           </div>
 
           <div className="dashboard-card">
             <div className="card-header">
-              <h3>Join Existing Game</h3>
+              <h3>🎯 Join Existing Game</h3>
               <p>Enter an active game room and compete</p>
             </div>
             <form className="room-form" onSubmit={onJoinRoom}>
+              <div className="input-group">
+                <label>Player Name</label>
+                <input
+                  type="text"
+                  name="joinPlayerName"
+                  placeholder="Enter your name (e.g., 'Jordan')"
+                  value={roomForm.joinPlayerName || ''}
+                  onChange={onRoomChange}
+                  disabled={loading}
+                  required
+                />
+              </div>
               <div className="input-group">
                 <label>Room Code</label>
                 <input
                   type="text"
                   name="joinName"
-                  placeholder="Enter room code"
+                  placeholder="Enter room code (e.g., 'ABC123')"
                   value={roomForm.joinName}
                   onChange={onRoomChange}
+                  disabled={loading}
+                  maxLength="6"
                   required
                 />
               </div>
-              <button type="submit" className="primary-button">
-                Join Game
+              <button 
+                type="submit" 
+                className="primary-button"
+                disabled={loading}
+              >
+                {loading ? 'Joining Room...' : 'Join Game'}
               </button>
             </form>
           </div>
         </div>
-
-        {error && <div className="alert alert-error">{error}</div>}
-        {message && <div className="alert alert-success">{message}</div>}
       </main>
     </div>
   );

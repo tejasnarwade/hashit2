@@ -120,7 +120,7 @@ const scriptedEvents = {
   },
 };
 
-function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
+function GameScreen({ roomCode, roomId, userId, integerUserId, onBackToMenu }) {
   const [currentYear, setCurrentYear] = useState(1);
   const [totalYears, setTotalYears] = useState(0);
   const [playerName, setPlayerName] = useState('');
@@ -190,7 +190,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
         .from('room_players')
         .select('users(name), current_wealth, salary, current_year')
         .eq('room_id', roomId)
-        .eq('user_id', userId)
+        .eq('user_id', integerUserId)
         .single();
 
       if (!playerError && player) {
@@ -440,7 +440,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
         .insert([
           {
             room_id: roomId,
-            user_id: userId,
+            user_id: integerUserId,
             year_number: currentYear,
             net_wealth: Math.round(newWealth),
           },
@@ -461,7 +461,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
         .from('room_players')
         .update(updatePayload)
         .eq('room_id', roomId)
-        .eq('user_id', userId);
+        .eq('user_id', integerUserId);
 
       if (updateResult.error) {
         // If current_year column doesn't exist, try without it
@@ -473,7 +473,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
               salary: Math.round(newSalary),
             })
             .eq('room_id', roomId)
-            .eq('user_id', userId);
+            .eq('user_id', integerUserId);
           
           if (fallbackResult.error) {
             updateError = fallbackResult.error;

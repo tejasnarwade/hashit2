@@ -487,64 +487,47 @@ function TradingViewChart({ ticker, label, color, onClose }) {
   const chartRef = React.useRef(null);
   const containerRef = React.useRef(null);
 
-  const yahooMap = {
-    NIFTY: '%5ENSEI',
-    SENSEX: '%5EBSESN',
-    BANKNIFTY: '%5ENSEBANK',
-    NIFTYIT: '%5ECNXIT',
-    CNXPHARMA: '%5ECNXPHARMA',
-    NIFTY_MIDCAP_100: '%5ECNXMIDCAP',
-  };
-
   React.useEffect(() => {
     if (!containerRef.current) return;
-    import('lightweight-charts').then(({ createChart, CrosshairMode }) => {
-      const chart = createChart(containerRef.current, {
+
+    // Generate realistic simulated price data for 1 year
+    const basePrice = { NIFTY: 22000, SENSEX: 73000, BANKNIFTY: 48000, NIFTYIT: 35000, CNXPHARMA: 18000, NIFTY_MIDCAP_100: 50000 }[ticker] || 20000;
+    const now = Math.floor(Date.now() / 1000);
+    const oneDay = 86400;
+    const data = [];
+    let price = basePrice;
+    for (let i = 365; i >= 0; i--) {
+      const ts = now - i * oneDay;
+      const d = new Date(ts * 1000);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      price = price * (1 + (Math.random() - 0.48) * 0.015);
+      data.push({ time: ts, value: parseFloat(price.toFixed(2)) });
+    }
+
+    import('lightweight-charts').then((lc) => {
+      const chart = lc.createChart(containerRef.current, {
         width: containerRef.current.clientWidth,
         height: containerRef.current.clientHeight,
         layout: { background: { color: '#0a0e27' }, textColor: 'rgba(255,255,255,0.7)' },
         grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
-        crosshair: { mode: CrosshairMode ? CrosshairMode.Normal : 1 },
         rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
         timeScale: { borderColor: 'rgba(255,255,255,0.1)', timeVisible: true },
       });
       chartRef.current = chart;
-
-      const lineSeries = chart.addAreaSeries({
-        lineColor: color || '#00ff9d',
-        topColor: (color || '#00ff9d') + '33',
-        bottomColor: (color || '#00ff9d') + '00',
+      const seriesColor = color || '#00ff9d';
+      const series = chart.addSeries(lc.AreaSeries, {
+        lineColor: seriesColor,
+        topColor: seriesColor + '33',
+        bottomColor: seriesColor + '00',
         lineWidth: 2,
-        crosshairMarkerVisible: true,
-        priceLineVisible: true,
       });
-
-      const sym = yahooMap[ticker] || '%5ENSEI';
-      fetch('https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1y')
-        .then(r => r.json())
-        .then(data => {
-          const result = data.chart.result[0];
-          const timestamps = result.timestamp;
-          const closes = result.indicators.quote[0].close;
-          const chartData = timestamps.map((t, i) => ({
-            time: t,
-            value: parseFloat(closes[i].toFixed(2)),
-          })).filter(d => d.value);
-          lineSeries.setData(chartData);
-          chart.timeScale().fitContent();
-        })
-        .catch(() => {
-          // fallback: show message
-          lineSeries.setData([]);
-        });
+      series.setData(data);
+      chart.timeScale().fitContent();
 
       const ro = new ResizeObserver(() => {
-        if (containerRef.current) {
-          chart.applyOptions({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
-        }
+        if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
       });
       ro.observe(containerRef.current);
-
       return () => { ro.disconnect(); chart.remove(); };
     });
   }, [ticker, color]);
@@ -554,8 +537,8 @@ function TradingViewChart({ ticker, label, color, onClose }) {
       <div className="chart-modal" onClick={e => e.stopPropagation()}>
         <button className="chart-modal-close" onClick={onClose}>×</button>
         <div style={{ padding: '8px 16px', background: 'rgba(0,255,157,0.08)', borderBottom: '1px solid rgba(0,255,157,0.2)', color: '#00ff9d', fontWeight: 700, fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>{label} — 1 Year Daily Chart</span>
-          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>Source: Yahoo Finance</span>
+          <span>{label} — Simulated 1Y Chart</span>
+          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Indicative Data</span>
         </div>
         <div ref={containerRef} style={{ width: '100%', height: 'calc(100% - 40px)' }} />
       </div>

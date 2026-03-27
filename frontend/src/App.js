@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import HomePage from './HomePage';
+<<<<<<< Updated upstream
 import { createClient } from '@supabase/supabase-js';
+=======
+import QuizPage from './QuizPage';
+>>>>>>> Stashed changes
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
@@ -345,6 +349,16 @@ function AboutPage({ username, onBack, onSignOut, loading }) {
 
 function App() {
   const [mode, setMode] = useState('login');
+<<<<<<< Updated upstream
+=======
+  const [route, setRoute] = useState(
+    window.location.pathname === '/quiz'
+      ? 'quiz'
+      : window.location.pathname === '/home'
+        ? 'home'
+        : 'auth'
+  );
+>>>>>>> Stashed changes
   const [form, setForm] = useState(initialForm);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -358,12 +372,40 @@ function App() {
 
   const isConfigured = useMemo(() => Boolean(supabase), []);
 
+<<<<<<< Updated upstream
   const navigate = (path) => {
     setRoute(path);
     resetFeedback();
   };
 
   useEffect(() => {
+=======
+  const navigate = (nextRoute) => {
+    const nextPath =
+      nextRoute === 'quiz' ? '/quiz' : nextRoute === 'home' ? '/home' : '/';
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    }
+    setRoute(nextRoute);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname === '/quiz') {
+        setRoute('quiz');
+      } else if (window.location.pathname === '/home') {
+        setRoute('home');
+      } else {
+        setRoute('auth');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+>>>>>>> Stashed changes
     if (!supabase) {
       return undefined;
     }
@@ -578,8 +620,16 @@ function App() {
   // Add routing logic based on authentication and route state
   useEffect(() => {
     if (currentUser) {
+<<<<<<< Updated upstream
       if (route === 'auth') {
         navigate('dashboard');
+=======
+      // Respect direct deep links; do not override /quiz
+      if (window.location.pathname === '/quiz') {
+        setRoute('quiz');
+      } else {
+        navigate('home');
+>>>>>>> Stashed changes
       }
     } else {
       if (route !== 'auth') {
@@ -627,6 +677,17 @@ function App() {
         onRoomChange={handleRoomChange}
         onCreateRoom={handleCreateRoom}
         onJoinRoom={handleJoinRoom}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
+
+  if (currentUser && route === 'quiz') {
+    return (
+      <QuizPage
+        currentUser={currentUser}
+        username={username}
+        loading={loading}
         onSignOut={handleSignOut}
       />
     );

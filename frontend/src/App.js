@@ -287,20 +287,46 @@ function App() {
         />
       ) : (
         <main className="app-shell">
+          {/* Subtle grid overlay for tech feel */}
+          <div className="grid-overlay"></div>
+          
+          {/* Animated data streams */}
+          <div className="data-streams">
+            <div className="stream stream-1"></div>
+            <div className="stream stream-2"></div>
+            <div className="stream stream-3"></div>
+          </div>
+
           <FloatingSymbols />
+          
           <section className="hero-panel">
-            <p className="eyebrow">Vectra Financial Game</p>
-            <h1>Master Your Financial Future</h1>
+            <div className="hero-header">
+              <p className="eyebrow">Vectra Financial Game</p>
+              <h1>
+                Master Your
+                <span className="highlight-text"> Financial Future</span>
+              </h1>
+            </div>
+            
             <p className="hero-copy">
               Compete in multiplayer financial simulation. Make strategic investment decisions, 
               manage risk, and build wealth over multiple years. Test your financial skills 
               against real players in dynamic market scenarios.
             </p>
+            
             <div className="feature-list">
-              <span>Investment Strategy</span>
-              <span>Risk Management</span>
-              <span>Multiplayer Rooms</span>
-              <span>Real-Time Competition</span>
+              <div className="feature-badge">
+                <span>Investment Strategy</span>
+              </div>
+              <div className="feature-badge">
+                <span>Risk Management</span>
+              </div>
+              <div className="feature-badge">
+                <span>Multiplayer Rooms</span>
+              </div>
+              <div className="feature-badge">
+                <span>Real-Time Competition</span>
+              </div>
             </div>
           </section>
 

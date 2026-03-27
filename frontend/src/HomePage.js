@@ -57,6 +57,19 @@ function HomePage({
                   required
                 />
               </div>
+              <div className="input-group">
+                <label>Number of Years</label>
+                <select
+                  name="createYears"
+                  value={roomForm.createYears || ''}
+                  onChange={onRoomChange}
+                >
+                  <option value="">Select Years</option>
+                  <option value={5}>5</option>
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                </select>
+              </div>
               <button type="submit" className="primary-button">
                 Create Room
               </button>
@@ -69,6 +82,17 @@ function HomePage({
               <p>Connect with others in an active room</p>
             </div>
             <form className="room-form" onSubmit={onJoinRoom}>
+              <div className="input-group">
+                <label>Room Code</label>
+                <input
+                  type="text"
+                  name="joinRoomCode"
+                  placeholder="Enter room code"
+                  value={roomForm.joinRoomCode || ''}
+                  onChange={onRoomChange}
+                  required
+                />
+              </div>
               <div className="input-group">
                 <label>Your Name</label>
                 <input

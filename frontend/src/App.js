@@ -122,7 +122,9 @@ function App() {
   const [session, setSession] = useState(null);
   const [roomForm, setRoomForm] = useState({
     createName: '',
+    createYears: '',
     joinName: '',
+    joinRoomCode: '',
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');

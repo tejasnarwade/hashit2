@@ -205,35 +205,35 @@ function App() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <p className="eyebrow">Vectra Authentication</p>
-        <h1>Secure Authentication Made Beautiful</h1>
+        <p className="eyebrow">Vectra Authentication Platform</p>
+        <h1>Enterprise-Grade Security</h1>
         <p className="hero-copy">
-          Experience seamless authentication with our modern interface powered by Supabase. 
-          Sign in with your Gmail or create an account in seconds with our beautiful, secure platform.
+          Advanced authentication system with modern architecture. Built with Supabase for reliable, 
+          scalable user management and secure access control.
         </p>
         <div className="feature-list">
-          <span>Secure & Fast</span>
-          <span>Modern Design</span>
-          <span>Powered by Supabase</span>
-          <span>Fully Responsive</span>
+          <span>End-to-End Encryption</span>
+          <span>Real-Time Sync</span>
+          <span>OAuth Integration</span>
+          <span>Cloud Infrastructure</span>
         </div>
       </section>
 
       <section className="auth-panel">
         {!isConfigured ? (
           <div className="auth-card">
-            <h2>Supabase keys missing</h2>
+            <h2>Configuration Required</h2>
             <p className="panel-copy">
-              Add `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY` to
-              your `.env` file, then restart the frontend.
+              Add REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY to
+              your .env file, then restart the application.
             </p>
           </div>
         ) : currentUser ? (
           <div className="auth-card">
-            <p className="status-badge">Authenticated</p>
-            <h2>Welcome back, {username}! 👋</h2>
+            <p className="status-badge">AUTHENTICATED</p>
+            <h2>Welcome back, {username}</h2>
             <p className="panel-copy">
-              You are successfully signed in as <strong>{currentUser.email}</strong>.
+              Session active for <strong>{currentUser.email}</strong>
             </p>
             {error ? <p className="feedback error">{error}</p> : null}
             {message ? <p className="feedback success">{message}</p> : null}
@@ -243,7 +243,7 @@ function App() {
               onClick={handleSignOut}
               disabled={loading}
             >
-              {loading ? 'Signing out...' : 'Sign out'}
+              {loading ? 'Terminating Session...' : 'Sign Out'}
             </button>
           </div>
         ) : (
@@ -271,11 +271,11 @@ function App() {
               </button>
             </div>
 
-            <h2>{mode === 'login' ? 'Welcome Back! 👋' : 'Join Vectra Today!'}</h2>
+            <h2>{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
             <p className="panel-copy">
               {mode === 'login'
-                ? 'Sign in to access your account and continue your journey.'
-                : 'Create your account and join our community. Quick, easy, and secure!'}
+                ? 'Access your account to continue with secure authentication.'
+                : 'Register for a new account with email verification and OAuth support.'}
             </p>
 
             <button
@@ -284,7 +284,7 @@ function App() {
               onClick={handleGoogleAuth}
               disabled={loading}
             >
-              {loading ? 'Opening Google...' : 'Continue with Google'}
+              {loading ? 'Authenticating...' : 'Continue with Google OAuth'}
             </button>
 
             <div className="divider">
@@ -307,11 +307,11 @@ function App() {
               ) : null}
 
               <label className="input-group">
-                <span>Gmail address</span>
+                <span>Email Address</span>
                 <input
                   type="email"
                   name="email"
-                  placeholder="you@gmail.com"
+                  placeholder="user@example.com"
                   value={form.email}
                   onChange={handleChange}
                   autoComplete="email"
@@ -338,11 +338,11 @@ function App() {
               <button type="submit" className="primary-button" disabled={loading}>
                 {loading
                   ? mode === 'login'
-                    ? 'Signing in...'
-                    : 'Creating account...'
+                    ? 'Authenticating...'
+                    : 'Creating Account...'
                   : mode === 'login'
-                    ? 'Login'
-                    : 'Register'}
+                    ? 'Sign In'
+                    : 'Create Account'}
               </button>
             </form>
           </div>

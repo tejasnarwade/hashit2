@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import FinancialQuiz from './FinancialQuiz';
 
 function formatCurrency(value) {
   return value.toLocaleString('en-IN', {
@@ -21,6 +22,7 @@ function GameSummary({
   onBackToMenu 
 }) {
   const [expandedDecision, setExpandedDecision] = useState(null);
+  const [showQuiz, setShowQuiz] = useState(false);
 
   // Calculate statistics
   const wealthGain = finalWealth - startingWealth;
@@ -437,10 +439,22 @@ function GameSummary({
 
       {/* ACTION BUTTONS */}
       <div className="summary-actions">
+        <button 
+          className="secondary-button" 
+          onClick={() => {
+            console.log('Quiz button clicked');
+            setShowQuiz(true);
+          }}
+        >
+          📚 Take Financial Quiz
+        </button>
         <button className="primary-button" onClick={onBackToMenu}>
           Back to Menu
         </button>
       </div>
+
+      {/* FINANCIAL QUIZ MODAL */}
+      {showQuiz && <FinancialQuiz onClose={() => setShowQuiz(false)} />}
     </div>
   );
 }

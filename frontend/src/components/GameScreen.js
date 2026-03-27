@@ -12,7 +12,7 @@ function formatCurrency(value) {
   });
 }
 
-// Investment options with different risk/return profiles
+// Investment options with different risk/return profilesd
 const investmentOptions = {
   stocks: {
     name: 'Stocks',

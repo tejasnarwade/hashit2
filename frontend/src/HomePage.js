@@ -1,5 +1,5 @@
 import React from 'react';
-
+//0
 function HomePage({
   currentUser,
   username,

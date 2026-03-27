@@ -14,6 +14,29 @@ const initialForm = {
   password: '',
 };
 
+// Floating symbols component for creative background
+const FloatingSymbols = () => {
+  const symbols = ['₹', '$', '€', '¥', '£', '₿'];
+  
+  return (
+    <div className="floating-symbols">
+      {symbols.map((symbol, index) => (
+        <span
+          key={index}
+          className="float-symbol"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${15 + Math.random() * 10}s`,
+          }}
+        >
+          {symbol}
+        </span>
+      ))}
+    </div>
+  );
+};
+
 function App() {
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState(initialForm);
@@ -204,6 +227,7 @@ function App() {
 
   return (
     <main className="app-shell">
+      <FloatingSymbols />
       <section className="hero-panel">
         <p className="eyebrow">Vectra Financial Game</p>
         <h1>Master Your Financial Future</h1>

@@ -53,43 +53,125 @@ function DashboardPage({ username, onNavigate, onSignOut, loading }) {
         </div>
       </nav>
 
-      <main className="home-main">
-        <div className="welcome-section">
-          <h1>Welcome back, {username}!</h1>
-          <p className="welcome-subtitle">Choose your action to continue with financial simulation:</p>
-        </div>
-
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Financial Game</h3>
-              <p>Start your financial simulation journey.</p>
+      <main className="dashboard-main">
+        {/* Enhanced Hero Section */}
+        <section className="dashboard-hero">
+          <div className="dashboard-content">
+            <div className="user-greeting">
+              <h1>Welcome back, <span className="username-highlight">{username}</span></h1>
+              <p className="dashboard-subtitle">
+                Ready to master financial decisions? Choose your path to building wealth and managing risk.
+              </p>
             </div>
-            <button className="primary-button" onClick={() => onNavigate('home')}>
-              Enter Game Room
-            </button>
-          </div>
-
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Financial Quiz</h3>
-              <p>Test your financial knowledge and skills.</p>
+            <div className="progress-indicator">
+              <div className="progress-item">
+                <div className="progress-icon level-icon"></div>
+                <div className="progress-text">
+                  <span className="progress-label">Player Level</span>
+                  <span className="progress-value">Beginner</span>
+                </div>
+              </div>
+              <div className="progress-item">
+                <div className="progress-icon goal-icon"></div>
+                <div className="progress-text">
+                  <span className="progress-label">Next Goal</span>
+                  <span className="progress-value">First Game</span>
+                </div>
+              </div>
             </div>
-            <button className="primary-button" onClick={() => onNavigate('quiz')}>
-              Take Quiz
-            </button>
           </div>
+        </section>
 
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Learn More</h3>
-              <p>Discover how Vectra works and game mechanics.</p>
+        {/* Enhanced Action Cards */}
+        <section className="actions-section">
+          <h2 className="actions-title">Your Financial Journey</h2>
+          <div className="actions-grid">
+            <div className="action-card primary-card">
+              <div className="card-decoration"></div>
+              <div className="card-icon-wrapper">
+                <div className="card-icon game-icon"></div>
+              </div>
+              <div className="card-content">
+                <h3>Financial Simulation</h3>
+                <p>Enter multiplayer rooms, make strategic investments, and compete with real players to maximize your wealth over multiple years.</p>
+                <div className="card-features">
+                  <span className="feature-tag">Multiplayer</span>
+                  <span className="feature-tag">Real-time</span>
+                  <span className="feature-tag">Strategic</span>
+                </div>
+              </div>
+              <button className="card-action-button primary" onClick={() => onNavigate('home')}>
+                Enter Game Room
+                <span className="button-arrow">→</span>
+              </button>
             </div>
-            <button className="primary-button" onClick={() => onNavigate('about')}>
-              About Game
-            </button>
+
+            <div className="action-card">
+              <div className="card-decoration"></div>
+              <div className="card-icon-wrapper">
+                <div className="card-icon quiz-icon"></div>
+              </div>
+              <div className="card-content">
+                <h3>Knowledge Test</h3>
+                <p>Assess your financial literacy with interactive quizzes covering investment strategies, risk management, and market dynamics.</p>
+                <div className="card-features">
+                  <span className="feature-tag">Educational</span>
+                  <span className="feature-tag">Interactive</span>
+                </div>
+              </div>
+              <button className="card-action-button" onClick={() => onNavigate('quiz')}>
+                Take Quiz
+                <span className="button-arrow">→</span>
+              </button>
+            </div>
+
+            <div className="action-card">
+              <div className="card-decoration"></div>
+              <div className="card-icon-wrapper">
+                <div className="card-icon learn-icon"></div>
+              </div>
+              <div className="card-content">
+                <h3>Game Guide</h3>
+                <p>Discover investment options, understand game mechanics, and learn about the team behind Vectra's financial education platform.</p>
+                <div className="card-features">
+                  <span className="feature-tag">Comprehensive</span>
+                  <span className="feature-tag">Detailed</span>
+                </div>
+              </div>
+              <button className="card-action-button" onClick={() => onNavigate('about')}>
+                Learn More
+                <span className="button-arrow">→</span>
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* Quick Stats Section */}
+        <section className="quick-stats">
+          <div className="stats-container">
+            <div className="stat-card">
+              <div className="stat-icon trophy-icon"></div>
+              <div className="stat-info">
+                <span className="stat-number">0</span>
+                <span className="stat-label">Games Played</span>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon chart-icon"></div>
+              <div className="stat-info">
+                <span className="stat-number">$0</span>
+                <span className="stat-label">Best Score</span>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon star-icon"></div>
+              <div className="stat-info">
+                <span className="stat-number">0</span>
+                <span className="stat-label">Achievements</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

@@ -39,40 +39,76 @@ function HomePage({
           <p className="welcome-subtitle">Ready to connect? Create or join a room to start chatting.</p>
         </div>
 
-        <div className="room-grid">
-          <form className="room-card" onSubmit={onCreateRoom}>
-            <h3>Create Room</h3>
-            <label className="input-group">
-              <span>Your name</span>
-              <input
-                type="text"
-                name="createName"
-                placeholder="Enter your name"
-                value={roomForm.createName}
-                onChange={onRoomChange}
-              />
-            </label>
-            <button type="submit" className="primary-button">
-              Create Room
-            </button>
-          </form>
+        <div className="dashboard-grid">
+          <div className="dashboard-card">
+            <div className="card-header">
+              <h3>Create a New Room</h3>
+              <p>Start a new conversation space</p>
+            </div>
+            <form className="room-form" onSubmit={onCreateRoom}>
+              <div className="input-group">
+                <label>Your Name</label>
+                <input
+                  type="text"
+                  name="createName"
+                  placeholder="Enter your display name"
+                  value={roomForm.createName}
+                  onChange={onRoomChange}
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <label>Number of Years</label>
+                <select
+                  name="createYears"
+                  value={roomForm.createYears || ''}
+                  onChange={onRoomChange}
+                >
+                  <option value="">Select Years</option>
+                  <option value={5}>5</option>
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                </select>
+              </div>
+              <button type="submit" className="primary-button">
+                Create Room
+              </button>
+            </form>
+          </div>
 
-          <form className="room-card" onSubmit={onJoinRoom}>
-            <h3>Join Room</h3>
-            <label className="input-group">
-              <span>Your name</span>
-              <input
-                type="text"
-                name="joinName"
-                placeholder="Enter your name"
-                value={roomForm.joinName}
-                onChange={onRoomChange}
-              />
-            </label>
-            <button type="submit" className="primary-button">
-              Join Room
-            </button>
-          </form>
+          <div className="dashboard-card">
+            <div className="card-header">
+              <h3>Join Existing Room</h3>
+              <p>Connect with others in an active room</p>
+            </div>
+            <form className="room-form" onSubmit={onJoinRoom}>
+              <div className="input-group">
+                <label>Room Code</label>
+                <input
+                  type="text"
+                  name="joinRoomCode"
+                  placeholder="Enter room code"
+                  value={roomForm.joinRoomCode || ''}
+                  onChange={onRoomChange}
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <label>Your Name</label>
+                <input
+                  type="text"
+                  name="joinName"
+                  placeholder="Enter your display name"
+                  value={roomForm.joinName}
+                  onChange={onRoomChange}
+                  required
+                />
+              </div>
+              <button type="submit" className="primary-button">
+                Join Room
+              </button>
+            </form>
+          </div>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}

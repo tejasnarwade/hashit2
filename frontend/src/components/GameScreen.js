@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../lib/supabase';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import GameSummary from './GameSummary';
 
 // Currency formatter for Indian Rupees
 function formatCurrency(value) {
@@ -150,6 +151,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
   const [error, setError] = useState('');
   const [leaderboard, setLeaderboard] = useState([]);
   const [yearResult, setYearResult] = useState(null);
+  const [gameProgress, setGameProgress] = useState([]); // Track all year results for game summary
   const [roomCurrentYear, setRoomCurrentYear] = useState(1);
   const [showAnalytics, setShowAnalytics] = useState(false); // Toggle analytics view
 
@@ -409,6 +411,18 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
         activeInsurances: insuranceHistory,
       });
 
+      // Track this year's progress for game summary
+      setGameProgress(prev => [...prev, {
+        year: currentYear,
+        net_wealth: Math.round(newWealth),
+        event: event.title,
+        salary: Math.round(newSalary),
+        investmentReturn: Math.round(totalInvestmentReturn),
+        insuranceCost,
+        liability,
+        loanRepayment: Math.round(loanRepayment),
+      }]);
+
       // Update state
       setActiveLoans(updatedActiveLoans);
       setLoanHistory(updatedLoanHistory);
@@ -555,11 +569,20 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
           </div>
 
           {gameOver ? (
-            <div className="game-over-message">
-              <h2>Game Over!</h2>
-              <p>Final Wealth: {formatCurrency(playerWealth)}</p>
-              <p>Check the leaderboard to see final rankings.</p>
-            </div>
+            <GameSummary
+              playerName={playerName}
+              totalYears={totalYears}
+              startingWealth={50000}
+              finalWealth={playerWealth}
+              gameProgress={gameProgress}
+              investmentAllocation={investmentAllocation}
+              insuranceHistory={insuranceHistory}
+              activeLoans={activeLoans}
+              loanHistory={loanHistory}
+              onBackToMenu={() => {
+                window.location.reload();
+              }}
+            />
           ) : (
             <div className="year-submission">
               <h2>Year {currentYear} - Life Events & Decisions</h2>

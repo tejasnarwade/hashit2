@@ -1,7 +1,7 @@
 {
-  "name": "hashit2-fullstack",
+  "name": "vectra-financial-game",
   "version": "1.0.0",
-  "description": "Full-stack React app with Node.js backend and Supabase",
+  "description": "Vectra - Financial Life Simulation Game with multiplayer support",
   "scripts": {
     "install-all": "npm install && npm install --prefix frontend && npm install --prefix backend",
     "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
@@ -11,7 +11,13 @@
   "devDependencies": {
     "concurrently": "^7.6.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "financial-game",
+    "investment-simulation",
+    "multiplayer",
+    "education",
+    "finance"
+  ],
+  "author": "Vectra Team",
+  "license": "MIT"
 }

@@ -205,17 +205,18 @@ function App() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <p className="eyebrow">Vectra Authentication Platform</p>
-        <h1>Enterprise-Grade Security</h1>
+        <p className="eyebrow">Vectra Financial Game</p>
+        <h1>Master Your Financial Future</h1>
         <p className="hero-copy">
-          Advanced authentication system with modern architecture. Built with Supabase for reliable, 
-          scalable user management and secure access control.
+          Compete in multiplayer financial simulation. Make strategic investment decisions, 
+          manage risk, and build wealth over multiple years. Test your financial skills 
+          against real players in dynamic market scenarios.
         </p>
         <div className="feature-list">
-          <span>End-to-End Encryption</span>
-          <span>Real-Time Sync</span>
-          <span>OAuth Integration</span>
-          <span>Cloud Infrastructure</span>
+          <span>Investment Strategy</span>
+          <span>Risk Management</span>
+          <span>Multiplayer Rooms</span>
+          <span>Real-Time Competition</span>
         </div>
       </section>
 
@@ -230,10 +231,10 @@ function App() {
           </div>
         ) : currentUser ? (
           <div className="auth-card">
-            <p className="status-badge">AUTHENTICATED</p>
-            <h2>Welcome back, {username}</h2>
+            <p className="status-badge">PLAYER READY</p>
+            <h2>Welcome, {username}</h2>
             <p className="panel-copy">
-              Session active for <strong>{currentUser.email}</strong>
+              Account verified. Ready to join game rooms and compete.
             </p>
             {error ? <p className="feedback error">{error}</p> : null}
             {message ? <p className="feedback success">{message}</p> : null}
@@ -243,7 +244,7 @@ function App() {
               onClick={handleSignOut}
               disabled={loading}
             >
-              {loading ? 'Terminating Session...' : 'Sign Out'}
+              {loading ? 'Logging Out...' : 'Exit Game'}
             </button>
           </div>
         ) : (
@@ -271,11 +272,11 @@ function App() {
               </button>
             </div>
 
-            <h2>{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
+            <h2>{mode === 'login' ? 'Player Login' : 'Join Vectra'}</h2>
             <p className="panel-copy">
               {mode === 'login'
-                ? 'Access your account to continue with secure authentication.'
-                : 'Register for a new account with email verification and OAuth support.'}
+                ? 'Sign in to access your player profile and join game rooms.'
+                : 'Create a player account to compete in financial simulation matches.'}
             </p>
 
             <button
@@ -284,7 +285,7 @@ function App() {
               onClick={handleGoogleAuth}
               disabled={loading}
             >
-              {loading ? 'Authenticating...' : 'Continue with Google OAuth'}
+              {loading ? 'Connecting...' : 'Quick Start with Google'}
             </button>
 
             <div className="divider">
@@ -294,11 +295,11 @@ function App() {
             <form className="auth-form" onSubmit={handleSubmit}>
               {mode === 'register' ? (
                 <label className="input-group">
-                  <span>Username</span>
+                  <span>Player Name</span>
                   <input
                     type="text"
                     name="username"
-                    placeholder="Enter your username"
+                    placeholder="Enter your player name"
                     value={form.username}
                     onChange={handleChange}
                     autoComplete="username"
@@ -338,11 +339,11 @@ function App() {
               <button type="submit" className="primary-button" disabled={loading}>
                 {loading
                   ? mode === 'login'
-                    ? 'Authenticating...'
-                    : 'Creating Account...'
+                    ? 'Logging In...'
+                    : 'Creating Player...'
                   : mode === 'login'
-                    ? 'Sign In'
-                    : 'Create Account'}
+                    ? 'Enter Game'
+                    : 'Start Playing'}
               </button>
             </form>
           </div>

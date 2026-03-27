@@ -1,6 +1,7 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "vectra-frontend",
+  "version": "1.0.0",
+  "description": "Vectra Financial Game - Frontend Application",
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

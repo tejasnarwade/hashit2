@@ -1,6 +1,6 @@
 {
-  "short_name": "Hashit2 App",
-  "name": "Hashit2 Full-Stack App",
+  "short_name": "Vectra",
+  "name": "Vectra - Financial Life Simulation Game",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#0a0e27",
+  "background_color": "#0a0e27"
 }

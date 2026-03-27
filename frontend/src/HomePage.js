@@ -11,17 +11,19 @@ function HomePage({
   onCreateRoom,
   onJoinRoom,
   onSignOut,
+  onNavigate,
 }) {
   return (  
     <div className="home-container">
       <nav className="navbar">
-        <div className="navbar-brand">
-          <h2>Vectra</h2>
-        </div>
+        <div className="navbar-brand"><h2>Vectra</h2></div>
         <div className="navbar-menu">
-          <button className="nav-button active">Dashboard</button>
+          <button className="nav-button" onClick={() => onNavigate && onNavigate('dashboard')}>Dashboard</button>
+          <button className="nav-button active">Game Room</button>
+          <button className="nav-button" onClick={() => onNavigate && onNavigate('markets')}>Markets</button>
+          <button className="nav-button" onClick={() => onNavigate && onNavigate('about')}>About</button>
           <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
-            {loading ? 'Logging Out...' : 'Exit Game'}
+            {loading ? 'Signing out...' : 'Sign Out'}
           </button>
         </div>
       </nav>

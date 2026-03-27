@@ -41,25 +41,25 @@ const FloatingSymbols = () => {
 };
 
 // New Dashboard and About pages from upstream
+function Navbar({ active, onNavigate, onSignOut, loading }) {
+  return (
+    <nav className="navbar">
+      <div className="navbar-brand"><h2>Vectra</h2></div>
+      <div className="navbar-menu">
+        <button className={`nav-button${active === 'dashboard' ? ' active' : ''}`} onClick={() => onNavigate('dashboard')}>Dashboard</button>
+        <button className={`nav-button${active === 'home' ? ' active' : ''}`} onClick={() => onNavigate('home')}>Game Room</button>
+        <button className={`nav-button${active === 'markets' ? ' active' : ''}`} onClick={() => onNavigate('markets')}>Markets</button>
+        <button className={`nav-button${active === 'about' ? ' active' : ''}`} onClick={() => onNavigate('about')}>About</button>
+        <button className="nav-button signout" onClick={onSignOut} disabled={loading}>{loading ? 'Signing out...' : 'Sign Out'}</button>
+      </div>
+    </nav>
+  );
+}
+
 function DashboardPage({ username, onNavigate, onSignOut, loading }) {
   return (
     <div className="home-container">
-      <nav className="navbar">
-        <div className="navbar-brand">
-          <h2>Vectra</h2>
-        </div>
-        <div className="navbar-menu">
-          <button className="nav-button active" onClick={() => onNavigate('dashboard')}>
-            Dashboard
-          </button>
-          <button className="nav-button" onClick={() => onNavigate('about')}>
-            About
-          </button>
-          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
-            {loading ? 'Signing out...' : 'Sign Out'}
-          </button>
-        </div>
-      </nav>
+      <Navbar active="dashboard" onNavigate={onNavigate} onSignOut={onSignOut} loading={loading} />
 
       <main className="dashboard-main">
         {/* Enhanced Hero Section */}
@@ -400,7 +400,7 @@ function TradingViewChart({ symbol, label, onClose }) {
   );
 }
 
-function MarketsPage({ onBack, onSignOut, loading }) {
+function MarketsPage({ onNavigate, onSignOut, loading }) {
   const [activeTab, setActiveTab] = React.useState('learn');
   const [activeChart, setActiveChart] = React.useState(null);
   const [unlockedModules, setUnlockedModules] = React.useState([0]);
@@ -417,18 +417,8 @@ function MarketsPage({ onBack, onSignOut, loading }) {
 
   return (
     <div className="home-container">
-      {activeChart && <TradingViewChart symbol={activeChart.symbol} label={activeChart.label} onClose={() => setActiveChart(null)} />}
-      <nav className="navbar">
-        <div className="navbar-brand"><h2>Vectra</h2></div>
-        <div className="navbar-menu">
-          <button className="nav-button" onClick={onBack}>Dashboard</button>
-          <button className="nav-button active">Markets</button>
-          <div className="xp-badge">⚡ {xp} XP</div>
-          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
-            {loading ? 'Signing out...' : 'Sign Out'}
-          </button>
-        </div>
-      </nav>
+      {activeChart && <TradingViewChart ticker={activeChart.ticker} label={activeChart.label} color={activeChart.color} onClose={() => setActiveChart(null)} />}
+      <Navbar active="markets" onNavigate={onNavigate} onSignOut={onSignOut} loading={loading} />
 
       <main className="about-main">
         <section className="about-hero" style={{ paddingBottom: 40 }}>
@@ -502,21 +492,10 @@ function MarketsPage({ onBack, onSignOut, loading }) {
   );
 }
 
-function AboutPage({ username, onBack, onSignOut, loading }) {
+function AboutPage({ username, onNavigate, onSignOut, loading }) {
   return (
     <div className="home-container">
-      <nav className="navbar">
-        <div className="navbar-brand">
-          <h2>Vectra</h2>
-        </div>
-        <div className="navbar-menu">
-          <button className="nav-button" onClick={onBack}>Dashboard</button>
-          <button className="nav-button active">About</button>
-          <button className="nav-button signout" onClick={onSignOut} disabled={loading}>
-            {loading ? 'Signing out...' : 'Sign Out'}
-          </button>
-        </div>
-      </nav>
+      <Navbar active="about" onNavigate={onNavigate} onSignOut={onSignOut} loading={loading} />
 
       <main className="about-main">
         {/* Hero Section */}
@@ -918,7 +897,7 @@ const handleGoogleAuth = async () => {
   if (currentUser && route === 'markets') {
     return (
       <MarketsPage
-        onBack={() => navigate('dashboard')}
+        onNavigate={navigate}
         onSignOut={handleSignOut}
         loading={loading}
       />
@@ -929,7 +908,7 @@ const handleGoogleAuth = async () => {
     return (
       <AboutPage
         username={username}
-        onBack={() => navigate('dashboard')}
+        onNavigate={navigate}
         onSignOut={handleSignOut}
         loading={loading}
       />
@@ -960,6 +939,7 @@ const handleGoogleAuth = async () => {
     return (
       <HomePage
         currentUser={currentUser}
+        username={username}
         error={error}
         message={message}
         loading={loading}
@@ -967,6 +947,7 @@ const handleGoogleAuth = async () => {
         onCreateRoom={handleCreateRoom}
         onJoinRoom={handleJoinRoom}
         onSignOut={handleSignOut}
+        onNavigate={navigate}
       />
     );
   }

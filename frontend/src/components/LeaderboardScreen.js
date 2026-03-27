@@ -10,7 +10,7 @@ function LeaderboardScreen({ roomId, onBackToMenu }) {
   useEffect(() => {
     loadLeaderboard();
   }, [roomId]);
-
+//0
   const loadLeaderboard = async () => {
     setLoading(true);
     setError('');

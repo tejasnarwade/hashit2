@@ -3,6 +3,7 @@ import './App.css';
 import HomePage from './HomePage';
 import AIChatBot from './AIChatBot';
 import InvestmentSimulator from './InvestmentSimulator';
+import GameScreen from './components/GameScreen';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -651,8 +652,14 @@ function App() {
   const [route, setRoute] = useState('auth'); // Add routing state
   const [roomForm, setRoomForm] = useState({
     createName: '',
+    createPlayerName: '',
     joinName: '',
+    joinPlayerName: '',
   });
+  const [roomCode, setRoomCode] = useState(null);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [integerUserId, setIntegerUserId] = useState(null);
 
 
   
@@ -830,30 +837,263 @@ const handleGoogleAuth = async () => {
     }));
   };
 
-  const handleCreateRoom = (event) => {
+  const handleCreateRoom = async (event) => {
     event.preventDefault();
     resetFeedback();
+    setLoading(true);
     
-    if (!roomForm.createName.trim()) {
-      setError('Please enter a room name');
-      return;
+    try {
+      if (!roomForm.createName.trim()) {
+        setError('Please enter a room name');
+        setLoading(false);
+        return;
+      }
+      
+      if (!roomForm.createPlayerName.trim()) {
+        setError('Please enter your player name');
+        setLoading(false);
+        return;
+      }
+      
+      // Generate a random room code as integer (6-digit number: 100000-999999)
+      const generatedRoomCode = Math.floor(100000 + Math.random() * 900000);
+      
+      // Create room in Supabase
+      if (supabase) {
+        // First, create or get user in the users table
+        const { data: existingUsers, error: userCheckError } = await supabase
+          .from('users')
+          .select('user_id')
+          .eq('auth_id', currentUser?.id);
+
+        let userId;
+        
+        if (!existingUsers || existingUsers.length === 0) {
+          // User doesn't exist, create new user record
+          const { data: newUser, error: userCreateError } = await supabase
+            .from('users')
+            .insert({
+              name: roomForm.createPlayerName,
+              auth_id: currentUser?.id,
+            })
+            .select('user_id')
+            .single();
+
+          if (userCreateError) {
+            console.error('User creation error:', userCreateError);
+            setError(`Failed to create user: ${userCreateError.message}`);
+            setLoading(false);
+            return;
+          }
+          userId = newUser.user_id;
+        } else {
+          userId = existingUsers[0].user_id;
+        }
+
+        // Create room
+        const { data: room, error: roomError } = await supabase
+          .from('rooms')
+          .insert({
+            room_code: generatedRoomCode,
+            current_year: 1,
+            total_years: 6,
+            status: 'waiting',
+          })
+          .select()
+          .single();
+
+        if (roomError) {
+          console.error('Room creation error:', roomError);
+          setError(`Failed to create room: ${roomError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        // Get the actual room_id from the response
+        const roomId = room.room_id;
+
+        // Add player to room
+        const { error: playerError } = await supabase
+          .from('room_players')
+          .insert({
+            room_id: roomId,
+            user_id: userId,
+            starting_wealth: 50000,
+            current_wealth: 50000,
+            salary: 300000,
+            current_year: 1,
+          });
+
+        if (playerError) {
+          console.error('Player add error:', playerError);
+          setError(`Failed to add player: ${playerError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        setRoomCode(generatedRoomCode);
+        setSelectedRoomId(roomId);
+        setIntegerUserId(userId);
+        setMessage(`Game room "${roomForm.createName}" created! Code: ${generatedRoomCode}`);
+        setRoomForm({ ...roomForm, createName: '', createPlayerName: '' });
+        
+        // Navigate to game after a short delay
+        setTimeout(() => {
+          setLoading(false);
+          navigate('game');
+        }, 500);
+      } else {
+        // Supabase not configured - use local game
+        setRoomCode(generatedRoomCode);
+        setSelectedRoomId(generatedRoomCode);
+        setMessage(`Game room created locally! Code: ${generatedRoomCode}`);
+        setRoomForm({ ...roomForm, createName: '', createPlayerName: '' });
+        
+        setTimeout(() => {
+          setLoading(false);
+          navigate('game');
+        }, 500);
+      }
+    } catch (err) {
+      console.error('Error creating room:', err);
+      setError(err.message || 'Failed to create room');
+      setLoading(false);
     }
-    
-    setMessage(`Game room "${roomForm.createName}" created! (Backend integration pending)`);
-    setRoomForm({ ...roomForm, createName: '' });
   };
 
-  const handleJoinRoom = (event) => {
+  const handleJoinRoom = async (event) => {
     event.preventDefault();
     resetFeedback();
+    setLoading(true);
     
-    if (!roomForm.joinName.trim()) {
-      setError('Please enter a room code');
-      return;
+    try {
+      if (!roomForm.joinName.trim()) {
+        setError('Please enter a room code');
+        setLoading(false);
+        return;
+      }
+      
+      if (!roomForm.joinPlayerName.trim()) {
+        setError('Please enter your player name');
+        setLoading(false);
+        return;
+      }
+
+      const roomCodeToJoin = roomForm.joinName;
+
+      // Verify room exists in Supabase
+      if (supabase) {
+        const { data: room, error: roomError } = await supabase
+          .from('rooms')
+          .select('room_id, total_years')
+          .eq('room_code', roomCodeToJoin)
+          .single();
+
+        if (roomError || !room) {
+          setError(`Room code "${roomCodeToJoin}" not found`);
+          setLoading(false);
+          return;
+        }
+
+        // First, create or get user in the users table
+        const { data: existingUsers, error: userCheckError } = await supabase
+          .from('users')
+          .select('user_id')
+          .eq('auth_id', currentUser?.id);
+
+        let userId;
+        
+        if (!existingUsers || existingUsers.length === 0) {
+          // User doesn't exist, create new user record
+          const { data: newUser, error: userCreateError } = await supabase
+            .from('users')
+            .insert({
+              name: roomForm.joinPlayerName,
+              auth_id: currentUser?.id,
+            })
+            .select('user_id')
+            .single();
+
+          if (userCreateError) {
+            console.error('User creation error:', userCreateError);
+            setError(`Failed to create user: ${userCreateError.message}`);
+            setLoading(false);
+            return;
+          }
+          userId = newUser.user_id;
+        } else {
+          userId = existingUsers[0].user_id;
+        }
+
+        const roomId = room.room_id;
+
+        // Add player to room
+        const { error: playerError } = await supabase
+          .from('room_players')
+          .insert({
+            room_id: roomId,
+            user_id: userId,
+            starting_wealth: 50000,
+            current_wealth: 50000,
+            salary: 300000,
+            current_year: 1,
+          });
+
+        if (playerError) {
+          console.error('Player add error:', playerError);
+          setError(`Failed to join room: ${playerError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        setRoomCode(roomCodeToJoin);
+        setSelectedRoomId(roomId);
+        setIntegerUserId(userId);
+        setMessage(`Successfully joined room "${roomCodeToJoin}"!`);
+      } else {
+        // Supabase not configured - allow local join
+        setRoomCode(roomCodeToJoin);
+        setSelectedRoomId(roomCodeToJoin);
+        setMessage(`Joining room "${roomCodeToJoin}"...`);
+      }
+      
+      setRoomForm({ 
+        ...roomForm, 
+        joinName: '',
+        joinPlayerName: '',
+      });
+      
+      // Navigate to game after a short delay
+      setTimeout(() => {
+        setLoading(false);
+        navigate('game');
+      }, 500);
+    } catch (err) {
+      console.error('Join room error:', err);
+      setError('An error occurred while joining the room');
+      setLoading(false);
     }
-    
-    setMessage(`Joining room "${roomForm.joinName}"... (Backend integration pending)`);
-    setRoomForm({ ...roomForm, joinName: '' });
+  };
+
+  const fetchLeaderboard = async (roomId) => {
+    try {
+      if (!supabase) return;
+
+      const { data: players, error } = await supabase
+        .from('room_players')
+        .select('player_name, current_wealth, users(email)')
+        .eq('room_id', roomId)
+        .order('current_wealth', { ascending: false });
+
+      if (error) {
+        console.error('Leaderboard fetch error:', error);
+        return;
+      }
+
+      setLeaderboard(players || []);
+    } catch (err) {
+      console.error('Leaderboard error:', err);
+    }
   };
 
   const currentUser = session?.user;
@@ -935,11 +1175,24 @@ const handleGoogleAuth = async () => {
     );
   }
 
+  if (currentUser && route === 'game') {
+    return (
+      <GameScreen
+        roomCode={roomCode}
+        roomId={selectedRoomId}
+        userId={currentUser?.id}
+        integerUserId={integerUserId}
+        onBackToMenu={() => navigate('home')}
+      />
+    );
+  }
+
   if (currentUser && route === 'home') {
     return (
       <HomePage
         currentUser={currentUser}
         username={username}
+        roomForm={roomForm}
         error={error}
         message={message}
         loading={loading}
@@ -948,6 +1201,7 @@ const handleGoogleAuth = async () => {
         onJoinRoom={handleJoinRoom}
         onSignOut={handleSignOut}
         onNavigate={navigate}
+        onBackToDashboard={() => navigate('dashboard')}
       />
     );
   }

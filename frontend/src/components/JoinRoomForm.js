@@ -10,7 +10,7 @@ function JoinRoomForm({ onRoomJoined, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+//k
     if (!playerName.trim()) {
       setError('Please enter your name');
       return;

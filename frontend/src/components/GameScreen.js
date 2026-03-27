@@ -12,7 +12,7 @@ function formatCurrency(value) {
   });
 }
 
-// Investment options with different risk/return profiles
+// Investment options with different risk/return profilesd
 const investmentOptions = {
   stocks: {
     name: 'Stocks',
@@ -120,7 +120,7 @@ const scriptedEvents = {
   },
 };
 
-function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
+function GameScreen({ roomCode, roomId, userId, integerUserId, onBackToMenu }) {
   const [currentYear, setCurrentYear] = useState(1);
   const [totalYears, setTotalYears] = useState(0);
   const [playerName, setPlayerName] = useState('');
@@ -162,59 +162,65 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
 
   const loadGameState = async () => {
     try {
-      // Get room info
+      // For new rooms (generated codes), initialize with defaults
+      if (!supabase) {
+        // Supabase not configured - use local defaults
+        initializeLocalGame();
+        return;
+      }
+
+      // Try to load from database
       const { data: room, error: roomError } = await supabase
         .from('rooms')
         .select('current_year, total_years')
         .eq('room_id', roomId)
         .single();
 
-      if (roomError) throw roomError;
+      if (roomError) {
+        // Room doesn't exist in database - initialize new game
+        initializeLocalGame();
+        return;
+      }
 
       setRoomCurrentYear(room.current_year);
       setTotalYears(room.total_years);
 
-      // Get player info
+      // Get player info if room exists
       const { data: player, error: playerError } = await supabase
         .from('room_players')
         .select('users(name), current_wealth, salary, current_year')
         .eq('room_id', roomId)
-        .eq('user_id', userId)
+        .eq('user_id', integerUserId)
         .single();
 
-      if (playerError) {
-        // If current_year column doesn't exist yet, try without it
-        if (playerError.message && playerError.message.includes('current_year')) {
-          const { data: playerAlt, error: playerAltError } = await supabase
-            .from('room_players')
-            .select('users(name), current_wealth, salary')
-            .eq('room_id', roomId)
-            .eq('user_id', userId)
-            .single();
-
-          if (playerAltError) throw playerAltError;
-
-          setPlayerName(playerAlt.users.name);
-          setPlayerWealth(playerAlt.current_wealth);
-          setSalary(playerAlt.salary || 300000);
-          setCurrentYear(room.current_year); // Fall back to room year temporarily
-        } else {
-          throw playerError;
-        }
-      } else {
+      if (!playerError && player) {
         setPlayerName(player.users.name);
         setPlayerWealth(player.current_wealth);
         setSalary(player.salary || 300000);
-        // Load player's individual year, default to room year if not set
         setCurrentYear(player.current_year || room.current_year || 1);
+      } else {
+        // Player not found - use defaults
+        initializeLocalGame();
       }
 
-      // Load leaderboard
+      // Load leaderboard if room exists
       await loadLeaderboard();
     } catch (err) {
       console.error('Error loading game state:', err);
-      setError('Failed to load game state');
+      // Fall back to local game initialization
+      initializeLocalGame();
     }
+  };
+
+  const initializeLocalGame = () => {
+    // Initialize with default values for a new local game
+    setPlayerName('Player');
+    setPlayerWealth(50000);
+    setSalary(300000);
+    setCurrentYear(1);
+    setTotalYears(6);
+    setRoomCurrentYear(1);
+    setError('');
   };
 
   const loadLeaderboard = async () => {
@@ -434,7 +440,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
         .insert([
           {
             room_id: roomId,
-            user_id: userId,
+            user_id: integerUserId,
             year_number: currentYear,
             net_wealth: Math.round(newWealth),
           },
@@ -455,7 +461,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
         .from('room_players')
         .update(updatePayload)
         .eq('room_id', roomId)
-        .eq('user_id', userId);
+        .eq('user_id', integerUserId);
 
       if (updateResult.error) {
         // If current_year column doesn't exist, try without it
@@ -467,7 +473,7 @@ function GameScreen({ roomCode, roomId, userId, onBackToMenu }) {
               salary: Math.round(newSalary),
             })
             .eq('room_id', roomId)
-            .eq('user_id', userId);
+            .eq('user_id', integerUserId);
           
           if (fallbackResult.error) {
             updateError = fallbackResult.error;

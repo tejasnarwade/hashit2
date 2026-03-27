@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import HomePage from './HomePage';
+import GameScreen from './components/GameScreen';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -871,6 +872,8 @@ function App() {
     createName: '',
     joinName: '',
   });
+  const [roomCode, setRoomCode] = useState(null);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
 
 
   
@@ -1057,8 +1060,17 @@ const handleGoogleAuth = async () => {
       return;
     }
     
-    setMessage(`Game room "${roomForm.createName}" created! (Backend integration pending)`);
+    // Generate a room code
+    const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setRoomCode(generatedCode);
+    setSelectedRoomId(generatedCode);
+    setMessage(`Game room "${roomForm.createName}" created!`);
     setRoomForm({ ...roomForm, createName: '' });
+    
+    // Navigate to game after a short delay
+    setTimeout(() => {
+      navigate('game');
+    }, 300);
   };
 
   const handleJoinRoom = (event) => {
@@ -1070,8 +1082,15 @@ const handleGoogleAuth = async () => {
       return;
     }
     
-    setMessage(`Joining room "${roomForm.joinName}"... (Backend integration pending)`);
+    setRoomCode(roomForm.joinName);
+    setSelectedRoomId(roomForm.joinName);
+    setMessage(`Joining room "${roomForm.joinName}"...`);
     setRoomForm({ ...roomForm, joinName: '' });
+    
+    // Navigate to game after a short delay
+    setTimeout(() => {
+      navigate('game');
+    }, 300);
   };
 
   const currentUser = session?.user;
@@ -1133,10 +1152,23 @@ const handleGoogleAuth = async () => {
     );
   }
 
+  if (currentUser && route === 'game') {
+    return (
+      <GameScreen
+        roomCode={roomCode}
+        roomId={selectedRoomId}
+        userId={currentUser?.id}
+        onBackToMenu={() => navigate('home')}
+      />
+    );
+  }
+
   if (currentUser && route === 'home') {
     return (
       <HomePage
         currentUser={currentUser}
+        username={username}
+        roomForm={roomForm}
         error={error}
         message={message}
         loading={loading}

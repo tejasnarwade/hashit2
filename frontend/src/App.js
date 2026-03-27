@@ -205,16 +205,17 @@ function App() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <p className="eyebrow">Supabase Auth</p>
-        <h1>Login and registration for your React app</h1>
+        <p className="eyebrow">Vectra Authentication</p>
+        <h1>Secure Authentication Made Beautiful</h1>
         <p className="hero-copy">
-          A simple auth flow connected directly to Supabase with Gmail address,
-          username, and password fields.
+          Experience seamless authentication with our modern interface powered by Supabase. 
+          Sign in with your Gmail or create an account in seconds with our beautiful, secure platform.
         </p>
         <div className="feature-list">
-          <span>Direct Supabase connection</span>
-          <span>Email/password auth</span>
-          <span>Session-aware screen</span>
+          <span>Secure & Fast</span>
+          <span>Modern Design</span>
+          <span>Powered by Supabase</span>
+          <span>Fully Responsive</span>
         </div>
       </section>
 
@@ -230,9 +231,9 @@ function App() {
         ) : currentUser ? (
           <div className="auth-card">
             <p className="status-badge">Authenticated</p>
-            <h2>Welcome, {username}</h2>
+            <h2>Welcome back, {username}! 👋</h2>
             <p className="panel-copy">
-              You are signed in as <strong>{currentUser.email}</strong>.
+              You are successfully signed in as <strong>{currentUser.email}</strong>.
             </p>
             {error ? <p className="feedback error">{error}</p> : null}
             {message ? <p className="feedback success">{message}</p> : null}
@@ -270,11 +271,11 @@ function App() {
               </button>
             </div>
 
-            <h2>{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
+            <h2>{mode === 'login' ? 'Welcome Back! 👋' : 'Join Vectra Today!'}</h2>
             <p className="panel-copy">
               {mode === 'login'
-                ? 'Sign in with your Gmail address and password.'
-                : 'Create an account with a username, Gmail address, password, or use Google.'}
+                ? 'Sign in to access your account and continue your journey.'
+                : 'Create your account and join our community. Quick, easy, and secure!'}
             </p>
 
             <button
